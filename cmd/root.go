@@ -17,9 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"hssh/templates"
 	"os"
 	"path"
-	"hssh/templates"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +33,8 @@ var rootCmd = &cobra.Command{
 
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
-  },
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
