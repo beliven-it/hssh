@@ -18,11 +18,11 @@ package cmd
 import (
 	"errors"
 	"hssh/providers"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,6 +30,7 @@ import (
 
 var homePlaceholder = "{{home}}"
 var sshLocalFolder = homePlaceholder + "/.ssh"
+var sshConfigFile = sshLocalFolder + "/config"
 
 func getProjectIDAndPath(providerConnectionString string) (string, string, error) {
 	rgx := regexp.MustCompile("^.*:/(.*)@(.*)$")
@@ -42,17 +43,17 @@ func getProjectIDAndPath(providerConnectionString string) (string, string, error
 	return matches[0][1], matches[0][2], nil
 }
 
-func replaceHomePlaceholder(path string) (string, error) {
+func replaceHomePlaceholder(filePath string) (string, error) {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
-		return path, err
+		return filePath, err
 	}
 	rgx := regexp.MustCompile(homePlaceholder)
-	return rgx.ReplaceAllString(path, homePath), nil
+	return rgx.ReplaceAllString(filePath, homePath), nil
 }
 
-func createSSHConfigFile(path string, content []byte) error {
-	file, err := os.Create(path)
+func createSSHConfigFile(filePath string, content []byte) error {
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
@@ -69,8 +70,43 @@ func createSSHConfigFile(path string, content []byte) error {
 	return nil
 }
 
-func craftPath(path string) (string, error) {
-	paths := strings.Split(path, "/")
+func isFilePathInConfigSSH(content string, filePath string) bool {
+	rgx := regexp.MustCompile(filePath)
+	return rgx.MatchString(content)
+}
+
+func addFilePathToConfigSSH(syncFile string) error {
+	configFile, err := replaceHomePlaceholder(sshConfigFile)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(configFile, os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	oldContent, err := ioutil.ReadFile(configFile)
+	oldContentToString := string(oldContent)
+
+	if isFilePathInConfigSSH(oldContentToString, syncFile) == true {
+		return nil
+	}
+
+	var row = "# File inserted with HSSH \n" + syncFile + "\n" + oldContentToString
+
+	_, err = file.WriteString(row)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func craftPath(filePath string) (string, error) {
+	paths := strings.Split(filePath, "/")
 	deepFolder := len(paths) - 1
 	folders := paths[0:deepFolder]
 	foldersToCreate := ""
@@ -102,7 +138,6 @@ var syncCmd = &cobra.Command{
 	Short:   "Sync connection files from the provider selected",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var wg sync.WaitGroup
 		providerConnectionString := viper.GetString("provider")
 
 		provider := providers.New(providerConnectionString)
@@ -115,36 +150,40 @@ var syncCmd = &cobra.Command{
 
 		for _, file := range files {
 
-			wg.Add(1)
 			fileID := file.ID
 			filePath := file.Path
 
-			go func() {
-				defer wg.Done()
+			func() {
+
 				fileContent, err := provider.GetFile(projectID, fileID)
 				if err != nil {
 					log.Fatal(err)
 					return
 				}
 
-				filePath, err := craftPath(filePath)
+				craftedPath, err := craftPath(filePath)
 				if err != nil {
 					log.Fatal(err)
 					return
 				}
 
-				err = createSSHConfigFile(filePath, fileContent)
+				err = createSSHConfigFile(craftedPath, fileContent)
 				if err != nil {
 					log.Fatal(err)
 					return
 				}
 
-				log.Println("Created:", filePath)
+				err = addFilePathToConfigSSH(craftedPath)
+				if err != nil {
+					log.Fatal(err)
+					return
+				}
+
+				return
 			}()
 
 		}
 
-		wg.Wait()
 	},
 }
 
