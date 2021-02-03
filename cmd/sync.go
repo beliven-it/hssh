@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"hssh/providers"
 	"io/ioutil"
 	"log"
@@ -178,6 +179,8 @@ var syncCmd = &cobra.Command{
 					log.Fatal(err)
 					return
 				}
+
+				fmt.Println("Create file", craftedPath)
 
 				return
 			}()
