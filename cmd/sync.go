@@ -96,7 +96,7 @@ func addFilePathToConfigSSH(syncFile string) error {
 		return nil
 	}
 
-	var row = "# File inserted with HSSH \n" + syncFile + "\n" + oldContentToString
+	var row = "# File inserted with HSSH \n" + "Include " + syncFile + "\n" + oldContentToString
 
 	_, err = file.WriteString(row)
 	if err != nil {
