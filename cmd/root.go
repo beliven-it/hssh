@@ -29,9 +29,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "hssh",
 	Short: "Basic SSH aliases manager",
-	Run: func(cmd *cobra.Command, args []string) {
-
-	},
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
