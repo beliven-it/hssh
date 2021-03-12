@@ -1,5 +1,6 @@
 # .goreleaser.yml
 brews:
+  -
     name: hssh
     tap:
       owner: heply
