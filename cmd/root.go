@@ -85,7 +85,7 @@ func initRequiredHomeSpaceFile(filePath string, template string) (string, int, e
 		file.WriteString(template)
 
 		fmt.Printf("Created missing %v file!", configPath)
-		return "", configInitializationStatusCode, err
+		return "", configInitializationStatusCode, nil
 	}
 
 	return configPath, 0, nil
