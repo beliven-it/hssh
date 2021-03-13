@@ -18,9 +18,22 @@ package cmd
 import (
 	"fmt"
 	"hssh/controllers"
+	"hssh/models"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
+
+func printConnection(connection *models.Connection) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	magenta := color.New(color.FgHiMagenta).SprintFunc()
+
+	fmt.Printf("\nName: %s\nHostname: %s\nUser: %s\nPort: %s\nIdentity: %s\n",
+		green(connection.Name), magenta(connection.Hostname), blue(connection.User), red(connection.Port), yellow(connection.IdentityFile))
+}
 
 // listCmd represents the list command
 var findCmd = &cobra.Command{
@@ -29,11 +42,7 @@ var findCmd = &cobra.Command{
 	Short:   "Find the details about a connection",
 	Run: func(cmd *cobra.Command, args []string) {
 		connection := controllers.Find()
-
-		fmt.Println(connection.Name)
-		fmt.Println(connection.Hostname)
-		fmt.Println(connection.Port)
-		fmt.Println(connection.IdentityFile)
+		printConnection(&connection)
 
 	},
 }
