@@ -2,9 +2,22 @@ package controllers
 
 import (
 	"bytes"
+	"hssh/models"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 )
+
+func serializeConnections(connections *[]models.Connection) string {
+	// Format in one string
+	listOfConnectionsNames := []string{}
+	for _, connection := range *connections {
+		listOfConnectionsNames = append(listOfConnectionsNames, connection.Name)
+	}
+
+	return strings.Join(listOfConnectionsNames, "\n")
+}
 
 func fzf(context string) string {
 	cmdOutput := &bytes.Buffer{}
@@ -31,4 +44,16 @@ func ssh(connectionName string) {
 	if err != nil {
 		os.Exit(1)
 	}
+}
+
+func fromFzfSelectionToConnection(selection string, connections *[]models.Connection) models.Connection {
+	clearRgx := regexp.MustCompile("(\\n|\\r)")
+	selection = clearRgx.ReplaceAllString(selection, "")
+	for _, connection := range *connections {
+		if connection.Name == selection {
+			return connection
+		}
+	}
+
+	return models.Connection{}
 }

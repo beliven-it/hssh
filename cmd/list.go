@@ -49,7 +49,6 @@ var listCmd = &cobra.Command{
 		connections := controllers.List()
 
 		printConnections(connections, colors)
-
 	},
 }
 

@@ -1,13 +1,12 @@
 package controllers
 
 import (
-	"fmt"
+	"hssh/models"
 	"os"
 )
 
-// Connect ...
-func Connect() {
-	// Select the connection using FZF
+// Find ...
+func Find() models.Connection {
 	connections := List()
 
 	commandVerbToExec := serializeConnections(&connections)
@@ -15,11 +14,8 @@ func Connect() {
 	// Choose connection
 	connectionName := fzf(commandVerbToExec)
 	if connectionName == "" {
-		fmt.Println("Selection is empty. The request is rejected")
-		os.Exit(1)
+		os.Exit(0)
 	}
 
-	// connect via ssh
-	ssh(connectionName)
-
+	return fromFzfSelectionToConnection(connectionName, &connections)
 }
