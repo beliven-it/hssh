@@ -31,8 +31,10 @@ func printConnection(connection *models.Connection) {
 	blue := color.New(color.FgBlue).SprintFunc()
 	magenta := color.New(color.FgHiMagenta).SprintFunc()
 
-	fmt.Printf("\nName: %s\nHostname: %s\nUser: %s\nPort: %s\nIdentity: %s\n",
-		green(connection.Name), magenta(connection.Hostname), blue(connection.User), red(connection.Port), yellow(connection.IdentityFile))
+	fmt.Printf(
+		"\nName: %s\nHostname: %s\nUser: %s\nPort: %s\nIdentity: %s\n",
+		green(connection.Name), magenta(connection.Hostname), blue(connection.User), red(connection.Port), yellow(connection.IdentityFile),
+	)
 }
 
 // listCmd represents the list command
@@ -43,7 +45,6 @@ var findCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		connection := controllers.Find()
 		printConnection(&connection)
-
 	},
 }
 

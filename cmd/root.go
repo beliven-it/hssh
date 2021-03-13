@@ -104,7 +104,7 @@ func initConfig() {
 
 	if statusCode == configInitializationStatusCode {
 		fmt.Println("Before starting to use hssh edit the newly created configuration file")
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	// Check or create configuration ssh file (.ssh/config)
