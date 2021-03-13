@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"hssh/config"
 	"hssh/providers"
 	"io/ioutil"
 	"log"
@@ -13,10 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const homePlaceholder = "{{home}}"
-const sshLocalFolder = homePlaceholder + "/.ssh"
-const sshConfigFile = sshLocalFolder + "/config"
-
 func getProjectIDAndPath(providerConnectionString string) (string, string, error) {
 	rgx := regexp.MustCompile("^.*:/(.*)@(.*)$")
 	matches := rgx.FindAllStringSubmatch(providerConnectionString, 1)
@@ -26,15 +23,6 @@ func getProjectIDAndPath(providerConnectionString string) (string, string, error
 	}
 
 	return matches[0][1], matches[0][2], nil
-}
-
-func replaceHomePlaceholder(filePath string) (string, error) {
-	homePath, err := os.UserHomeDir()
-	if err != nil {
-		return filePath, err
-	}
-	rgx := regexp.MustCompile(homePlaceholder)
-	return rgx.ReplaceAllString(filePath, homePath), nil
 }
 
 func createSSHConfigFile(filePath string, content []byte) error {
@@ -62,25 +50,24 @@ func isFilePathInConfigSSH(content string, filePath string) bool {
 	return rgx.MatchString(content)
 }
 
-func upsertConfigSSH(syncFile string) error {
-	configFile, err := replaceHomePlaceholder(sshConfigFile)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.OpenFile(configFile, os.O_RDWR, 0777)
+func upsertConfigSSH() error {
+	file, err := os.OpenFile(config.SSHConfigFilePath, os.O_RDWR, 0777)
 	if err != nil {
 		return err
 	}
 
 	defer file.Close()
 
-	oldContent, err := ioutil.ReadFile(configFile)
+	oldContent, err := ioutil.ReadFile(config.SSHConfigFilePath)
 	oldContentToString := string(oldContent)
 
-	var row = "# HSSH start managed\n" + "Include " + syncFile + "/*\n# HSSH end managed\n"
+	delimiterStart := "# HSSH start managed"
+	delimiterEnd := "# HSSH end managed"
+	includeString := "Include " + config.HSSHHostFolderName + "/*"
+
+	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n"
 	if isFilePathInConfigSSH(oldContentToString, row) == true {
-		deleteRegex := regexp.MustCompile("(?ms)# HSSH start managed.*# HSSH end managed\n")
+		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n")
 		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
 	}
 
@@ -92,35 +79,17 @@ func upsertConfigSSH(syncFile string) error {
 	return nil
 }
 
-func craftPath(filePath string) (string, error) {
+func craftPath(filePath string) string {
 	paths := strings.Split(filePath, "/")
-	deepFolder := len(paths) - 1
-	folders := paths[0:deepFolder]
-	foldersToCreate := ""
+	fileName := paths[len(paths)-1]
 
-	if len(folders) > 0 {
-		foldersToCreate = strings.Join(folders, "/")
-	}
+	filePath = config.HSSHHostFolderPath + "/" + fileName
 
-	filePath, err := replaceHomePlaceholder(sshLocalFolder)
-	if err != nil {
-		return "", err
-	}
-
-	if foldersToCreate != "" {
-		filePath = filePath + "/" + foldersToCreate
-		os.MkdirAll(filePath, os.ModePerm)
-	}
-
-	filePath = filePath + "/" + paths[deepFolder]
-
-	return filePath, nil
-
+	return filePath
 }
 
 // Sync ...
 func Sync() {
-
 	providerConnectionString := viper.GetString("provider")
 	projectID, remotePath, err := getProjectIDAndPath(providerConnectionString)
 
@@ -132,7 +101,7 @@ func Sync() {
 	}
 
 	// Create the entity in .ssh/config
-	defer upsertConfigSSH(remotePath)
+	defer upsertConfigSSH()
 
 	for _, file := range files {
 
@@ -140,19 +109,13 @@ func Sync() {
 		filePath := file.Path
 
 		func() {
-
 			fileContent, err := provider.GetFile(projectID, fileID)
 			if err != nil {
 				log.Fatal(err)
 				return
 			}
 
-			craftedPath, err := craftPath(filePath)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-
+			craftedPath := craftPath(filePath)
 			err = createSSHConfigFile(craftedPath, fileContent)
 			if err != nil {
 				log.Fatal(err)

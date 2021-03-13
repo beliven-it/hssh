@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"hssh/config"
 	"hssh/templates"
 	"os"
 	"path"
@@ -54,7 +55,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-// initSSHConfig check if file ~/.ssh/config
+// InitSSHConfig check if file ~/.ssh/config
 // exist and create it if not
 func initRequiredHomeSpaceFile(configPath string, template string) (int, error) {
 	// Create needed folders if not exist
@@ -80,23 +81,22 @@ func initRequiredHomeSpaceFile(configPath string, template string) (int, error) 
 	}
 
 	return 0, nil
+}
 
+func initHSSHHostFolder() error {
+	err := os.MkdirAll(config.HSSHHostFolderPath, os.ModePerm)
+	if err != nil {
+		fmt.Printf("Error creating folders: %v\n", err)
+		return err
+	}
+
+	return nil
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// Obtain home path
-	home, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	configPath := home + "/.config/hssh/config.yml"
-	sshConfigPath := home + "/.ssh/config"
-
 	// Check or create configuration file (config.yml)
-	statusCode, err := initRequiredHomeSpaceFile(configPath, templates.Config)
+	statusCode, err := initRequiredHomeSpaceFile(config.HSSHConfigFilePath, templates.Config)
 	if err != nil {
 		fmt.Println("An error occured during config.yml initialization")
 		os.Exit(1)
@@ -109,14 +109,21 @@ func initConfig() {
 
 	// Check or create configuration ssh file (.ssh/config)
 	// If not exist the file will created empty
-	_, err = initRequiredHomeSpaceFile(sshConfigPath, "")
+	_, err = initRequiredHomeSpaceFile(config.SSHConfigFilePath, "")
 	if err != nil {
 		fmt.Println("An error occured during ssh config initialization")
 		os.Exit(1)
 	}
 
+	// Check or create hssh host folder
+	err = initHSSHHostFolder()
+	if err != nil {
+		fmt.Println("An error occured during the creation of the host folder")
+		os.Exit(1)
+	}
+
 	// Search "config.yml" file in "$HOME/.config/hssh" directory.
-	viper.SetConfigFile(configPath)
+	viper.SetConfigFile(config.HSSHConfigFilePath)
 
 	viper.AutomaticEnv() // read in environment variables that match
 

@@ -21,5 +21,4 @@ func Connect() {
 
 	// connect via ssh
 	ssh(connectionName)
-
 }
