@@ -25,7 +25,7 @@ import (
 var syncCmd = &cobra.Command{
 	Use:     "sync",
 	Aliases: []string{"s"},
-	Short:   "Sync connection files from the provider selected",
+	Short:   "Sync down hosts from the Git provider",
 	Run: func(cmd *cobra.Command, args []string) {
 		controllers.Sync()
 	},

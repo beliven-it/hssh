@@ -25,10 +25,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Set version
+var Version string
+
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "hssh",
-	Short: "Basic SSH aliases manager",
+	Short: "Heply CLI to simplify the management of SSH hosts",
+	Version: Version,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
