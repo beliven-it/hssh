@@ -25,6 +25,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const configInitializationStatusCode = 2
+
 // Version of the app provided
 // in build phase
 var Version string
@@ -52,9 +54,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	// Find home directory.
+// initSSHConfig check if file ~/.ssh/config
+// exist and create it if not
+func initRequiredHomeSpaceFile(filePath string, template string) (string, int, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Println(err)
@@ -62,27 +64,54 @@ func initConfig() {
 	}
 
 	// Set config file path
-	var configPath string = home + "/.config/hssh/config.yml"
+	var configPath string = home + filePath
 
 	// Create needed folders if not exist
 	err = os.MkdirAll(path.Dir(configPath), os.ModePerm)
 	if err != nil {
 		fmt.Printf("Error creating folders: %v\n", err)
-		os.Exit(1)
+		return "", 1, err
 	}
 
 	// Create config file starting from template if not exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		file, err := os.Create(configPath)
 		if err != nil {
-			fmt.Printf("Error creating config file: %v\n", err)
-			os.Exit(1)
+			fmt.Printf("Error creating file: %v\n", err)
+			return "", 1, err
 		}
 
 		defer file.Close()
-		file.WriteString(templates.Config)
+		file.WriteString(template)
 
-		fmt.Printf("Created missing %v file! Update config values to start using this CLI.\n", configPath)
+		fmt.Printf("Created missing %v file!", configPath)
+		return "", configInitializationStatusCode, err
+	}
+
+	return configPath, 0, nil
+
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+
+	// Check or create configuration file (config.yml)
+	configPath, statusCode, err := initRequiredHomeSpaceFile("/.config/hssh/config.yml", templates.Config)
+	if err != nil {
+		fmt.Println("An error occured during config.yml initialization")
+		os.Exit(1)
+	}
+
+	if statusCode == configInitializationStatusCode {
+		fmt.Println("Before starting to use hssh edit the newly created configuration file")
+		os.Exit(1)
+	}
+
+	// Check or create configuration ssh file (.ssh/config)
+	// If not exist the file will created empty
+	_, _, err = initRequiredHomeSpaceFile("/.ssh/config", "")
+	if err != nil {
+		fmt.Println("An error occured during ssh config initialization")
 		os.Exit(1)
 	}
 
@@ -92,9 +121,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		// fmt.Println("Using config file:", viper.ConfigFileUsed())
-	} else {
+	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file: %v\n", err)
 		os.Exit(1)
 	}
