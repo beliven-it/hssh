@@ -25,7 +25,7 @@ import (
 var connectCmd = &cobra.Command{
 	Use:     "connect",
 	Aliases: []string{"c"},
-	Short:   "Connect to the host selected",
+	Short:   "Search and connect to host using fzf",
 	Run: func(cmd *cobra.Command, args []string) {
 		controllers.Connect()
 	},

@@ -41,7 +41,7 @@ func printConnections(connections []models.Connection, withColor bool) {
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "List all available SSH aliases",
+	Short:   "List all available hosts",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get flags values
 		colors, _ := cmd.Flags().GetBool("colors")
