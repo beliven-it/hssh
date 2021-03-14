@@ -65,9 +65,9 @@ func upsertConfigSSH() error {
 	delimiterEnd := "# HSSH end managed"
 	includeString := "Include " + config.HSSHHostFolderName + "/*"
 
-	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n"
+	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
 	if isFilePathInConfigSSH(oldContentToString, row) == true {
-		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n")
+		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n\n")
 		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
 	}
 
