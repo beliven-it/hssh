@@ -2,32 +2,18 @@ package controllers
 
 import (
 	"fmt"
+	"hssh/config"
 	"hssh/models"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 // List the connections available
 func List() []models.Connection {
-	sshTargetFolder := viper.GetString("ssh_config_folder")
-	if sshTargetFolder == "" {
-		fmt.Println("Error, missing or invalid target folder. Are you sure to fill the ssh_config_folder in config file?")
-		os.Exit(1)
-	}
-
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Printf("Error finding home folder: %v\n", err)
-		os.Exit(1)
-	}
-
-	files, err := ioutil.ReadDir(home + "/.ssh/" + sshTargetFolder)
+	files, err := ioutil.ReadDir(config.HSSHHostFolderPath)
 	if err != nil {
 		fmt.Printf("Error reading files in folder: %v\n", err)
 		os.Exit(1)
@@ -35,7 +21,7 @@ func List() []models.Connection {
 
 	content := ""
 	for _, file := range files {
-		data, err := ioutil.ReadFile(home + "/.ssh/" + sshTargetFolder + "/" + file.Name())
+		data, err := ioutil.ReadFile(config.HSSHHostFolderPath + "/" + file.Name())
 		if err != nil {
 			fmt.Printf("File reading error: %v\n", err)
 			os.Exit(1)

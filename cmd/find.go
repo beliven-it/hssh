@@ -24,35 +24,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func printConnections(connections []models.Connection, withColor bool) {
+func printConnection(connection *models.Connection) {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
-	for _, connection := range connections {
-		if withColor {
-			fmt.Printf("%s -> %s@%s:%s %s\n", green(connection.Name), connection.User, connection.Hostname, red(connection.Port), yellow(connection.IdentityFile))
-		} else {
-			fmt.Printf("%s -> %s@%s:%s %s\n", connection.Name, connection.User, connection.Hostname, connection.Port, connection.IdentityFile)
-		}
-	}
+	blue := color.New(color.FgBlue).SprintFunc()
+	magenta := color.New(color.FgHiMagenta).SprintFunc()
+
+	fmt.Printf(
+		"\nName: %s\nHostname: %s\nUser: %s\nPort: %s\nIdentity: %s\n",
+		green(connection.Name), magenta(connection.Hostname), blue(connection.User), red(connection.Port), yellow(connection.IdentityFile),
+	)
 }
 
 // listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:     "list",
-	Aliases: []string{"l"},
-	Short:   "List all available hosts",
+var findCmd = &cobra.Command{
+	Use:     "find",
+	Aliases: []string{"f"},
+	Short:   "Find host details using fzf",
 	Run: func(cmd *cobra.Command, args []string) {
-		colors, _ := cmd.Flags().GetBool("colors")
-
-		connections := controllers.List()
-
-		printConnections(connections, colors)
+		connection := controllers.Find()
+		printConnection(&connection)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
-
-	listCmd.Flags().BoolP("colors", "c", false, "List hosts with color highlights.")
+	rootCmd.AddCommand(findCmd)
 }
