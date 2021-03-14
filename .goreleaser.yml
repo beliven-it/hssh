@@ -10,7 +10,7 @@ brews:
       owner: heply
       name: homebrew-tap
     folder: Formula
-    description: "Heply CLI to simplify the management of SSH hosts"
+    description: "A CLI to easily sync, list, search and connect to SSH hosts"
     license: "MIT"
     dependencies:
       - name: fzf
