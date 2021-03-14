@@ -24,7 +24,7 @@ Right now the CLI supports only GitLab as a provider, but more will be added.
 
 In order to make the CLI working with GitLab, you have to replace this parameters inside the gitlab URL:
 
-1. `<TOKEN>` - A personal access token with `read_repository` scope.
+1. `<TOKEN>` - A personal access token with `read_api` and `read_repository` scopes.
 2. `<PROJECT_ID>` - The GitLab project/repository ID.
 3. `<FOLDER_PATH>` - The folder inside the project/repository with the files containing SSH hosts aliases.
 
