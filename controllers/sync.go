@@ -97,7 +97,8 @@ func Sync() {
 
 	files, err := provider.GetFiles(projectID, remotePath)
 	if err != nil {
-		log.Fatal("Cannot get files from provider: " + err.Error())
+		fmt.Println("Cannot get files from provider: " + err.Error())
+		os.Exit(1)
 	}
 
 	// Create the entity in .ssh/config
