@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Heply SRL <hello@heply.it>
+Copyright © 2021 Heply SRL <hello@heply.it>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ var Version string
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:     "hssh",
-	Short:   "Heply CLI to simplify the management of SSH hosts",
+	Short:   "A CLI to easily sync, list, search and connect to SSH hosts",
 	Version: Version,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
