@@ -41,7 +41,7 @@ func printConnection(connection *models.Connection) {
 var findCmd = &cobra.Command{
 	Use:     "find",
 	Aliases: []string{"f"},
-	Short:   "Find the details about a connection",
+	Short:   "Find host details using fzf",
 	Run: func(cmd *cobra.Command, args []string) {
 		connection := controllers.Find()
 		printConnection(&connection)
