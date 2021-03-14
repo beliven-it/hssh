@@ -151,7 +151,7 @@ func initConfig() {
 
 	isEmpty, err := isFolderEmpty(config.HSSHHostFolderPath)
 	if err != nil || isEmpty == true {
-		fmt.Println("The host folder is empty.\nIn this case the sync will begin automatically.")
+		fmt.Println("The host folder is empty.\nRunning the first sync...")
 		controllers.Sync()
 		os.Exit(0)
 	}
