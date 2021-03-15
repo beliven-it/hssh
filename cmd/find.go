@@ -42,6 +42,9 @@ var findCmd = &cobra.Command{
 	Use:     "find",
 	Aliases: []string{"f"},
 	Short:   "Find host details using fzf",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		controllers.Init(false)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		connection := controllers.Find()
 		printConnection(&connection)

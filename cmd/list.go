@@ -42,17 +42,17 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
 	Short:   "List all available hosts",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		controllers.Init(false)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		colors, _ := cmd.Flags().GetBool("colors")
-
 		connections := controllers.List()
-
 		printConnections(connections, colors)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-
 	listCmd.Flags().BoolP("colors", "c", false, "List hosts with color highlights.")
 }

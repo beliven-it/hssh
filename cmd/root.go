@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"hssh/controllers"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -44,21 +43,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func isInitCommand() bool {
-	for _, arg := range os.Args {
-		if arg == "init" || arg == "i" {
-			return true
-		}
-	}
-	return false
-}
-
-func init() {
-	cobra.OnInitialize(func() {
-		if isInitCommand() == false {
-			controllers.Init(false)
-		}
-	})
 }
