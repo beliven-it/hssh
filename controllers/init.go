@@ -118,7 +118,6 @@ func Init(showAllMessages bool) {
 	if err != nil || isEmpty == true {
 		fmt.Println("The host folder is empty.\nRunning the first sync...")
 		Sync()
-		os.Exit(0)
 	}
 
 	if showAllMessages == true {
