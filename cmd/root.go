@@ -23,8 +23,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const configInitializationStatusCode = 2
-
 // Version of the app provided
 // in build phase
 var Version string
