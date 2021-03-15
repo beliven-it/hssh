@@ -109,7 +109,7 @@ func Sync() {
 		fileID := file.ID
 		filePath := file.Path
 
-		func() {
+		go func() {
 			fileContent, err := provider.GetFile(projectID, fileID)
 			if err != nil {
 				log.Fatal(err)
