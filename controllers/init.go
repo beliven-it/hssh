@@ -66,7 +66,7 @@ func isFolderEmpty(path string) (bool, error) {
 }
 
 // Init ...
-func Init() {
+func Init(showAllMessages bool) {
 
 	// Check or create configuration file (config.yml)
 	statusCode, err := initRequiredHomeSpaceFile(config.HSSHConfigFilePath, templates.Config)
@@ -80,12 +80,20 @@ func Init() {
 		os.Exit(0)
 	}
 
+	if showAllMessages == true {
+		fmt.Println("The config.yml is initialized successfully.")
+	}
+
 	// Check or create configuration ssh file (.ssh/config)
 	// If not exist the file will created empty
 	_, err = initRequiredHomeSpaceFile(config.SSHConfigFilePath, "")
 	if err != nil {
 		fmt.Println("An error occured during ssh config initialization.")
 		os.Exit(1)
+	}
+
+	if showAllMessages == true {
+		fmt.Println("The .ssh/config is initialized successfully.")
 	}
 
 	// Search "config.yml" file in "$HOME/.config/hssh" directory.
@@ -111,5 +119,9 @@ func Init() {
 		fmt.Println("The host folder is empty.\nRunning the first sync...")
 		Sync()
 		os.Exit(0)
+	}
+
+	if showAllMessages == true {
+		fmt.Println("The host folder exist and is not empty.")
 	}
 }

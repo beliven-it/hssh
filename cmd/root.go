@@ -48,6 +48,19 @@ func Execute() {
 	}
 }
 
+func isInitCommand() bool {
+	for _, arg := range os.Args {
+		if arg == "init" || arg == "i" {
+			return true
+		}
+	}
+	return false
+}
+
 func init() {
-	cobra.OnInitialize(controllers.Init)
+	cobra.OnInitialize(func() {
+		if isInitCommand() == false {
+			controllers.Init(false)
+		}
+	})
 }
