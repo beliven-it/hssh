@@ -26,6 +26,9 @@ var syncCmd = &cobra.Command{
 	Use:     "sync",
 	Aliases: []string{"s"},
 	Short:   "Sync down hosts from the Git provider",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		controllers.Init(false)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		controllers.Sync()
 	},
