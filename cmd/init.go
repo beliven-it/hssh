@@ -27,7 +27,7 @@ var initCmd = &cobra.Command{
 	Aliases: []string{"i"},
 	Short:   "Init HSSH",
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.Init()
+		controllers.Init(true)
 	},
 }
 
