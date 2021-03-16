@@ -6,6 +6,7 @@ import (
 	"hssh/models"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -23,29 +24,10 @@ func readHostFile(path string, channel *chan models.Connection, wg *sync.WaitGro
 	defer wg.Done()
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Printf("File reading error: %v\n", err)
-		os.Exit(1)
+		return
 	}
 
 	parseHostFile(string(data), channel)
-}
-
-func readHostFolder(path string, channel *chan models.Connection, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	var fs = new(sync.WaitGroup)
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		fmt.Printf("Error reading files in folder: %v\n", err)
-		os.Exit(1)
-	}
-
-	for _, file := range files {
-		fs.Add(1)
-		go readHostFile(path+"/"+file.Name(), channel, fs)
-	}
-
-	fs.Wait()
 }
 
 func translateToAbsolutePath(path string) string {
@@ -54,7 +36,9 @@ func translateToAbsolutePath(path string) string {
 		return path
 	}
 
-	return config.SSHFolderPath + "/" + path
+	path = config.SSHFolderPath + "/" + path
+
+	return path
 }
 
 func isFileIncluded(path string) bool {
@@ -66,7 +50,7 @@ func isFileIncluded(path string) bool {
 	return true
 }
 
-func readConfig(channel *chan models.Connection) ([]string, []string) {
+func readConfig(channel *chan models.Connection) []string {
 	includeRgx := regexp.MustCompile("(?m)^Include (.*)$")
 
 	content, err := ioutil.ReadFile(config.SSHConfigFilePath)
@@ -78,22 +62,16 @@ func readConfig(channel *chan models.Connection) ([]string, []string) {
 	body := string(content)
 	includes := includeRgx.FindAllStringSubmatch(body, -1)
 
-	includesFoldersPath := []string{}
-	includesFilesPath := []string{}
+	includesPath := []string{}
 	for _, include := range includes {
 		pathTranslated := translateToAbsolutePath(include[1])
-		if isFileIncluded(pathTranslated) {
-			includesFilesPath = append(includesFilesPath, pathTranslated)
-			continue
-		}
 
-		pathTranslated = strings.Replace(pathTranslated, "*", "", -1)
-		includesFoldersPath = append(includesFoldersPath, pathTranslated)
+		includesPath = append(includesPath, pathTranslated)
 	}
 
 	parseHostFile(body, channel)
 
-	return includesFoldersPath, includesFilesPath
+	return includesPath
 }
 
 func unique(arr []string) []string {
@@ -115,25 +93,31 @@ func List() []models.Connection {
 	var wg = new(sync.WaitGroup)
 	var channel = make(chan models.Connection)
 	var connections []models.Connection
+	var filesToRead = []string{}
 
 	var folders = []string{
-		config.HSSHHostFolderPath + "/",
+		config.HSSHHostFolderPath,
 	}
 
 	go waitForParsedConnections(&connections, &channel)
 
-	foldersToInclude, filesToRead := readConfig(&channel)
+	foldersToInclude := readConfig(&channel)
 
 	folders = unique(append(folders, foldersToInclude...))
+
+	// Take all files from folder
+	for _, folder := range folders {
+		files, ok := filepath.Glob(folder)
+		if ok != nil {
+			continue
+		}
+
+		filesToRead = append(filesToRead, files...)
+	}
 
 	for _, file := range filesToRead {
 		wg.Add(1)
 		go readHostFile(file, &channel, wg)
-	}
-
-	for _, folder := range folders {
-		wg.Add(1)
-		go readHostFolder(folder, &channel, wg)
 	}
 
 	wg.Wait()
