@@ -32,8 +32,19 @@ func readHostFile(path string, channel *chan models.Connection, wg *sync.WaitGro
 
 func translateToAbsolutePath(path string) string {
 	firstChar := string(path[0])
-	if firstChar == "/" || firstChar == "~" {
+	if firstChar == "/" {
 		return path
+	}
+
+	if firstChar == "~" {
+
+		homePath, err := os.UserHomeDir()
+		if err != nil {
+			return path
+		}
+
+		path = string(path[1:])
+		return homePath + path
 	}
 
 	path = config.SSHFolderPath + "/" + path
@@ -110,6 +121,10 @@ func List() []models.Connection {
 		files, ok := filepath.Glob(folder)
 		if ok != nil {
 			continue
+		}
+
+		if len(files) == 0 {
+			filesToRead = append(filesToRead, folder)
 		}
 
 		filesToRead = append(filesToRead, files...)
