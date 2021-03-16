@@ -16,8 +16,8 @@ func Connect(host string) {
 		// Choose connection
 		connectionString := fzf(commandVerbToExec)
 		if connectionString == "" {
-			fmt.Println("Selection is empty. The request is rejected")
-			os.Exit(1)
+			fmt.Println("You have select nothing. Aborting connection.")
+			os.Exit(0)
 		}
 
 		connection := fromFzfSelectionToConnection(connectionString, &connections)
