@@ -6,21 +6,25 @@ import (
 )
 
 // Connect ...
-func Connect() {
-	// Select the connection using FZF
-	connections := List()
+func Connect(host string) {
+	if host == "" {
+		// Select the connection using FZF
+		connections := List()
 
-	commandVerbToExec := serializeConnections(&connections)
+		commandVerbToExec := serializeConnections(&connections)
 
-	// Choose connection
-	connectionString := fzf(commandVerbToExec)
-	if connectionString == "" {
-		fmt.Println("Selection is empty. The request is rejected")
-		os.Exit(1)
+		// Choose connection
+		connectionString := fzf(commandVerbToExec)
+		if connectionString == "" {
+			fmt.Println("Selection is empty. The request is rejected")
+			os.Exit(1)
+		}
+
+		connection := fromFzfSelectionToConnection(connectionString, &connections)
+
+		host = connection.Name
 	}
 
-	connection := fromFzfSelectionToConnection(connectionString, &connections)
-
 	// connect via ssh
-	ssh(connection.Name)
+	ssh(host)
 }

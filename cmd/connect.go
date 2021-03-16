@@ -30,7 +30,12 @@ var connectCmd = &cobra.Command{
 		controllers.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.Connect()
+		var host string
+		if len(args) > 0 {
+			host = args[0]
+		}
+
+		controllers.Connect(host)
 	},
 }
 
