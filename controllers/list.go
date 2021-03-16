@@ -49,7 +49,8 @@ func readHostFolder(path string, channel *chan models.Connection, wg *sync.WaitG
 }
 
 func translateToAbsolutePath(path string) string {
-	if string(path[0]) == "/" {
+	firstChar := string(path[0])
+	if firstChar == "/" || firstChar == "~" {
 		return path
 	}
 
