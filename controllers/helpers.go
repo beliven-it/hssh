@@ -59,3 +59,49 @@ func fromFzfSelectionToConnection(selection string, connections *[]models.Connec
 
 	return models.Connection{}
 }
+
+func parseHostFile(content string, channel *chan models.Connection) {
+
+	// Remove comments from content.
+	content = regexp.MustCompile("(?m)^#.*").ReplaceAllString(content, "")
+
+	// Remove empty lines from content.
+	content = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(content), "\n")
+
+	// Split content into hosts.
+	hosts := strings.Split(content, "Host ")
+
+	for indexHost, host := range hosts {
+		if indexHost == 0 {
+			continue
+		}
+
+		host = strings.ReplaceAll(host, " ", "")
+
+		var temp = models.Connection{}
+		for indexParam, param := range strings.Split(host, "\n") {
+
+			if indexParam == 0 {
+				temp.Name = param
+			} else {
+				if strings.Contains(param, "Hostname") {
+					temp.Hostname = strings.ReplaceAll(param, "Hostname", "")
+				}
+
+				if strings.Contains(param, "User") {
+					temp.User = strings.ReplaceAll(param, "User", "")
+				}
+
+				if strings.Contains(param, "Port") {
+					temp.Port = strings.ReplaceAll(param, "Port", "")
+				}
+
+				if strings.Contains(param, "IdentityFile") {
+					temp.IdentityFile = strings.ReplaceAll(param, "IdentityFile", "")
+				}
+			}
+		}
+
+		*channel <- temp
+	}
+}

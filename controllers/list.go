@@ -9,72 +9,135 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 )
 
-// List the connections available
-func List() []models.Connection {
-	files, err := ioutil.ReadDir(config.HSSHHostFolderPath)
+func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection) {
+	for connection := range *channel {
+		*connections = append(*connections, connection)
+	}
+}
+
+func readHostFile(path string, channel *chan models.Connection, wg *sync.WaitGroup) {
+	defer wg.Done()
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Printf("File reading error: %v\n", err)
+		os.Exit(1)
+	}
+
+	parseHostFile(string(data), channel)
+}
+
+func readHostFolder(path string, channel *chan models.Connection, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	var fs = new(sync.WaitGroup)
+	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		fmt.Printf("Error reading files in folder: %v\n", err)
 		os.Exit(1)
 	}
 
-	content := ""
 	for _, file := range files {
-		data, err := ioutil.ReadFile(config.HSSHHostFolderPath + "/" + file.Name())
-		if err != nil {
-			fmt.Printf("File reading error: %v\n", err)
-			os.Exit(1)
-		}
-
-		// Convert byte to string and add to content.
-		content += string(data)
+		fs.Add(1)
+		go readHostFile(path+"/"+file.Name(), channel, fs)
 	}
 
-	// Remove comments from content.
-	content = regexp.MustCompile("(?m)^#.*").ReplaceAllString(content, "")
+	fs.Wait()
+}
 
-	// Remove empty lines from content.
-	content = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(content), "\n")
+func translateToAbsolutePath(path string) string {
+	if string(path[0]) == "/" {
+		return path
+	}
 
-	// Split content into hosts.
-	hosts := strings.Split(content, "Host ")
+	return config.SSHFolderPath + "/" + path
+}
 
-	// Map hosts into array of Connection struct.
-	var connections []models.Connection
-	for indexHost, host := range hosts {
-		if indexHost == 0 {
+func isFileIncluded(path string) bool {
+	lastChar := string(path[len(path)-1])
+	if lastChar == "*" || lastChar == "/" {
+		return false
+	}
+
+	return true
+}
+
+func readConfig(channel *chan models.Connection) ([]string, []string) {
+	includeRgx := regexp.MustCompile("(?m)^Include (.*)$")
+
+	content, err := ioutil.ReadFile(config.SSHConfigFilePath)
+	if err != nil {
+		fmt.Printf("File reading error: %v\n", err)
+		os.Exit(1)
+	}
+
+	body := string(content)
+	includes := includeRgx.FindAllStringSubmatch(body, -1)
+
+	includesFoldersPath := []string{}
+	includesFilesPath := []string{}
+	for _, include := range includes {
+		pathTranslated := translateToAbsolutePath(include[1])
+		if isFileIncluded(pathTranslated) {
+			includesFilesPath = append(includesFilesPath, pathTranslated)
 			continue
 		}
 
-		host = strings.ReplaceAll(host, " ", "")
-
-		var temp = models.Connection{}
-		for indexParam, param := range strings.Split(host, "\n") {
-
-			if indexParam == 0 {
-				temp.Name = param
-			} else {
-				if strings.Contains(param, "Hostname") {
-					temp.Hostname = strings.ReplaceAll(param, "Hostname", "")
-				}
-
-				if strings.Contains(param, "User") {
-					temp.User = strings.ReplaceAll(param, "User", "")
-				}
-
-				if strings.Contains(param, "Port") {
-					temp.Port = strings.ReplaceAll(param, "Port", "")
-				}
-
-				if strings.Contains(param, "IdentityFile") {
-					temp.IdentityFile = strings.ReplaceAll(param, "IdentityFile", "")
-				}
-			}
-		}
-
-		connections = append(connections, temp)
+		pathTranslated = strings.Replace(pathTranslated, "*", "", -1)
+		includesFoldersPath = append(includesFoldersPath, pathTranslated)
 	}
+
+	parseHostFile(body, channel)
+
+	return includesFoldersPath, includesFilesPath
+}
+
+func unique(arr []string) []string {
+	occured := map[string]bool{}
+	result := []string{}
+
+	for e := range arr {
+		if occured[arr[e]] != true {
+			occured[arr[e]] = true
+			result = append(result, arr[e])
+		}
+	}
+
+	return result
+}
+
+// List the connections available
+func List() []models.Connection {
+	var wg = new(sync.WaitGroup)
+	var channel = make(chan models.Connection)
+	var connections []models.Connection
+
+	var folders = []string{
+		config.HSSHHostFolderPath + "/",
+	}
+
+	go waitForParsedConnections(&connections, &channel)
+
+	foldersToInclude, filesToRead := readConfig(&channel)
+
+	folders = unique(append(folders, foldersToInclude...))
+
+	for _, file := range filesToRead {
+		wg.Add(1)
+		go readHostFile(file, &channel, wg)
+	}
+
+	for _, folder := range folders {
+		wg.Add(1)
+		go readHostFolder(folder, &channel, wg)
+	}
+
+	wg.Wait()
+
+	time.Sleep(10 * time.Millisecond)
 
 	// Sort alphabetically (case insensitive).
 	sort.Slice(connections[:], func(i, j int) bool {
