@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -104,12 +105,16 @@ func Sync() {
 	// Create the entity in .ssh/config
 	defer upsertConfigSSH()
 
+	var wg = new(sync.WaitGroup)
+
 	for _, file := range files {
 
 		fileID := file.ID
 		filePath := file.Path
 
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			fileContent, err := provider.GetFile(projectID, fileID)
 			if err != nil {
 				log.Fatal(err)
@@ -127,6 +132,8 @@ func Sync() {
 
 			return
 		}()
+
+		wg.Wait()
 
 	}
 }
