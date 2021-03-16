@@ -13,12 +13,14 @@ func Connect() {
 	commandVerbToExec := serializeConnections(&connections)
 
 	// Choose connection
-	connectionName := fzf(commandVerbToExec)
-	if connectionName == "" {
+	connectionString := fzf(commandVerbToExec)
+	if connectionString == "" {
 		fmt.Println("Selection is empty. The request is rejected")
 		os.Exit(1)
 	}
 
+	connection := fromFzfSelectionToConnection(connectionString, &connections)
+
 	// connect via ssh
-	ssh(connectionName)
+	ssh(connection.Name)
 }

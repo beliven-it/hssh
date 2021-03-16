@@ -12,10 +12,10 @@ func Find() models.Connection {
 	commandVerbToExec := serializeConnections(&connections)
 
 	// Choose connection
-	connectionName := fzf(commandVerbToExec)
-	if connectionName == "" {
+	connectionString := fzf(commandVerbToExec)
+	if connectionString == "" {
 		os.Exit(0)
 	}
 
-	return fromFzfSelectionToConnection(connectionName, &connections)
+	return fromFzfSelectionToConnection(connectionString, &connections)
 }

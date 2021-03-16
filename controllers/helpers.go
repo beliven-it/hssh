@@ -13,7 +13,7 @@ func serializeConnections(connections *[]models.Connection) string {
 	// Format in one string
 	listOfConnectionsNames := []string{}
 	for _, connection := range *connections {
-		listOfConnectionsNames = append(listOfConnectionsNames, connection.Name)
+		listOfConnectionsNames = append(listOfConnectionsNames, connection.Name+" -> "+connection.Hostname)
 	}
 
 	return strings.Join(listOfConnectionsNames, "\n")
@@ -48,7 +48,9 @@ func ssh(connectionName string) {
 
 func fromFzfSelectionToConnection(selection string, connections *[]models.Connection) models.Connection {
 	clearRgx := regexp.MustCompile("(\\n|\\r)")
+	takeNameRgx := regexp.MustCompile(" ->.*")
 	selection = clearRgx.ReplaceAllString(selection, "")
+	selection = takeNameRgx.ReplaceAllString(selection, "")
 	for _, connection := range *connections {
 		if connection.Name == selection {
 			return connection
