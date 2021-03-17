@@ -37,6 +37,7 @@ func createSSHConfigFile(filePath string, content []byte) error {
 	if _, err := file.Write(content); err != nil {
 		return err
 	}
+
 	if err := file.Sync(); err != nil {
 		return err
 	}
