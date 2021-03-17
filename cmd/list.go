@@ -16,26 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"hssh/controllers"
-	"hssh/models"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
-
-func printConnections(connections []models.Connection, withColor bool) {
-	green := color.New(color.FgGreen).SprintFunc()
-	red := color.New(color.FgRed).SprintFunc()
-	yellow := color.New(color.FgYellow).SprintFunc()
-	for _, connection := range connections {
-		if withColor {
-			fmt.Printf("%s -> %s@%s:%s %s\n", green(connection.Name), connection.User, connection.Hostname, red(connection.Port), yellow(connection.IdentityFile))
-		} else {
-			fmt.Printf("%s -> %s@%s:%s %s\n", connection.Name, connection.User, connection.Hostname, connection.Port, connection.IdentityFile)
-		}
-	}
-}
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
@@ -48,7 +32,10 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		colors, _ := cmd.Flags().GetBool("colors")
 		connections := controllers.List()
-		printConnections(connections, colors)
+
+		for _, connection := range connections {
+			controllers.PrintConnection(&connection, colors)
+		}
 	},
 }
 
