@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"hssh/config"
+	"hssh/models"
 	"hssh/providers"
 	"io/ioutil"
 	"log"
@@ -24,25 +25,6 @@ func getProjectIDAndPath(providerConnectionString string) (string, string, error
 	}
 
 	return matches[0][1], matches[0][2], nil
-}
-
-func createSSHConfigFile(filePath string, content []byte) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	if _, err := file.Write(content); err != nil {
-		return err
-	}
-
-	if err := file.Sync(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func isFilePathInConfigSSH(content string, filePath string) bool {
@@ -116,6 +98,7 @@ func Sync() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+
 			fileContent, err := provider.GetFile(projectID, fileID)
 			if err != nil {
 				log.Fatal(err)
@@ -123,9 +106,12 @@ func Sync() {
 			}
 
 			craftedPath := craftPath(filePath)
-			err = createSSHConfigFile(craftedPath, fileContent)
+
+			host := models.NewHost(craftedPath)
+
+			err = host.Create(fileContent)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err.Error())
 				return
 			}
 
@@ -134,7 +120,6 @@ func Sync() {
 			return
 		}()
 
-		wg.Wait()
-
 	}
+	wg.Wait()
 }

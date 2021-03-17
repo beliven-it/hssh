@@ -2,6 +2,7 @@ package models
 
 import (
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -18,6 +19,7 @@ type IHost interface {
 	Parse(*chan Connection)
 	GetPath() string
 	GetContent() string
+	Create([]byte) error
 }
 
 func (h *host) ReadFile() {
@@ -27,6 +29,25 @@ func (h *host) ReadFile() {
 	}
 
 	h.content = string(contentBytes)
+}
+
+func (h *host) Create(content []byte) error {
+	file, err := os.Create(h.path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	if _, err := file.Write(content); err != nil {
+		return err
+	}
+
+	if err := file.Sync(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (h *host) Parse(channel *chan Connection) {

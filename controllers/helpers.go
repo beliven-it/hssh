@@ -2,12 +2,41 @@ package controllers
 
 import (
 	"bytes"
+	"fmt"
 	"hssh/models"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/fatih/color"
 )
+
+// PrintConnectionDetails ...
+func PrintConnectionDetails(connection *models.Connection) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	magenta := color.New(color.FgHiMagenta).SprintFunc()
+
+	fmt.Printf(
+		"\nName: %s\nHostname: %s\nUser: %s\nPort: %s\nIdentity: %s\n",
+		green(connection.Name), magenta(connection.Hostname), blue(connection.User), red(connection.Port), yellow(connection.IdentityFile),
+	)
+}
+
+// PrintConnection ...
+func PrintConnection(connection *models.Connection, withColors bool) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	if withColors {
+		fmt.Printf("%s -> %s@%s:%s %s\n", green(connection.Name), connection.User, connection.Hostname, red(connection.Port), yellow(connection.IdentityFile))
+	} else {
+		fmt.Printf("%s -> %s@%s:%s %s\n", connection.Name, connection.User, connection.Hostname, connection.Port, connection.IdentityFile)
+	}
+}
 
 func serializeConnections(connections *[]models.Connection) string {
 	listOfConnectionsNames := []string{}
