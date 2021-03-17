@@ -7,7 +7,6 @@ import (
 	"hssh/models"
 	"hssh/providers"
 	"io/ioutil"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -96,18 +95,16 @@ func Sync() {
 		filePath := file.Path
 
 		wg.Add(1)
-		go func() {
+		go func(path string, id string) {
 			defer wg.Done()
 
-			fileContent, err := provider.GetFile(projectID, fileID)
+			fileContent, err := provider.GetFile(projectID, id)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err.Error())
 				return
 			}
 
-			craftedPath := craftPath(filePath)
-
-			host := models.NewHost(craftedPath)
+			host := models.NewHost(craftPath(path))
 
 			err = host.Create(fileContent)
 			if err != nil {
@@ -115,10 +112,8 @@ func Sync() {
 				return
 			}
 
-			fmt.Println("Create file", craftedPath)
-
-			return
-		}()
+			fmt.Println("File created:", path)
+		}(filePath, fileID)
 
 	}
 	wg.Wait()
