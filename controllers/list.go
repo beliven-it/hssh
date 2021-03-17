@@ -34,10 +34,7 @@ func translateToAbsolutePath(path string) string {
 	firstChar := string(path[0])
 	if firstChar == "/" {
 		return path
-	}
-
-	if firstChar == "~" {
-
+	} else if firstChar == "~" {
 		homePath, err := os.UserHomeDir()
 		if err != nil {
 			return path
@@ -45,9 +42,18 @@ func translateToAbsolutePath(path string) string {
 
 		path = string(path[1:])
 		return homePath + path
+	} else {
+		path = config.SSHFolderPath + "/" + path
 	}
 
-	path = config.SSHFolderPath + "/" + path
+	stat, err := os.Stat(path)
+	if err != nil {
+		return path
+	}
+
+	if stat.IsDir() == true {
+		path = path + "/*"
+	}
 
 	return path
 }
