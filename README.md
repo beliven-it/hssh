@@ -1,4 +1,4 @@
-![HSSH](./assets/banner.svg)
+<p align='center'><img src='./assets/logo_small.svg' /></p>
 
 A CLI to easily list, search and connect to SSH hosts. Sync down hosts from providers in order to get a centralized hosts configuration.
 
