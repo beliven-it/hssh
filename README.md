@@ -65,6 +65,9 @@ Run `./hssh` inside the folder to test the CLI.
 
 Please open a new issue [here](https://github.com/heply/hssh/issues).
 
+## Mentions
+- [dmitri13](https://www.flaticon.com/authors/dmitri13) for the icon of the terminal used in the banner image
+
 ## License
 
 Licensed under [MIT](./LICENSE)
