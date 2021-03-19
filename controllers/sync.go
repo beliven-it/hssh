@@ -110,7 +110,7 @@ func syncWithProvider(providerConnection string) {
 				return
 			}
 
-			fmt.Println("File created:", path)
+			fmt.Println("File created:", host.GetPath())
 		}(filePath, fileID)
 
 	}
@@ -119,7 +119,7 @@ func syncWithProvider(providerConnection string) {
 
 // Sync ...
 func Sync() {
-	providers := viper.GetStringSlice("provider")
+	providers := viper.GetStringSlice("providers")
 	var wg = new(sync.WaitGroup)
 
 	for _, provider := range providers {
