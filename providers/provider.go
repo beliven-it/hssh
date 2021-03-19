@@ -18,10 +18,15 @@ type IProvider interface {
 	iGetFile
 	iGetFiles
 	iGetPrivateToken
+	iGetDriver
 }
 
 type iGet interface {
 	get(string, []queryParam) ([]byte, error)
+}
+
+type iGetDriver interface {
+	GetDriver() string
 }
 
 type iGetFiles interface {
@@ -49,6 +54,7 @@ type provider struct {
 	url              string
 	privateToken     string
 	connectionString string
+	driver           string
 }
 
 type file struct {
@@ -61,6 +67,10 @@ type file struct {
 type queryParam struct {
 	key   string
 	value string
+}
+
+func (p *provider) GetDriver() string {
+	return p.driver
 }
 
 func (p *provider) GetConnectionString() string {
