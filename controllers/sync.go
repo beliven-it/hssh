@@ -71,12 +71,10 @@ func craftPath(filePath string) string {
 	return filePath
 }
 
-// Sync ...
-func Sync() {
-	providerConnectionString := viper.GetString("provider")
-	projectID, remotePath, err := getProjectIDAndPath(providerConnectionString)
+func syncWithProvider(providerConnection string) {
+	projectID, remotePath, err := getProjectIDAndPath(providerConnection)
 
-	provider := providers.New(providerConnectionString)
+	provider := providers.New(providerConnection)
 
 	files, err := provider.GetFiles(projectID, remotePath)
 	if err != nil {
@@ -104,7 +102,7 @@ func Sync() {
 				return
 			}
 
-			host := models.NewHost(craftPath(path))
+			host := models.NewHost(craftPath(path) + "." + provider.GetDriver())
 
 			err = host.Create(fileContent)
 			if err != nil {
@@ -117,4 +115,21 @@ func Sync() {
 
 	}
 	wg.Wait()
+}
+
+// Sync ...
+func Sync() {
+	providers := viper.GetStringSlice("provider")
+	var wg = new(sync.WaitGroup)
+
+	for _, provider := range providers {
+		wg.Add(1)
+		go func(p string) {
+			defer wg.Done()
+			syncWithProvider(p)
+		}(provider)
+	}
+
+	wg.Wait()
+
 }
