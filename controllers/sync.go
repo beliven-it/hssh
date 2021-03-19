@@ -119,13 +119,22 @@ func syncWithProvider(providerConnection string) {
 
 // Sync ...
 func Sync() {
-	providers := viper.GetStringSlice("providers")
+	singleProvider := viper.GetString("provider")
+	multiProvider := viper.GetStringSlice("providers")
+
+	multiProvider = append(multiProvider, singleProvider)
+	multiProvider = unique(multiProvider)
+
 	var wg = new(sync.WaitGroup)
 
-	for _, provider := range providers {
+	for _, provider := range multiProvider {
 		wg.Add(1)
 		go func(p string) {
 			defer wg.Done()
+			if p == "" {
+				return
+			}
+
 			syncWithProvider(p)
 		}(provider)
 	}
