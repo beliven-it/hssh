@@ -140,6 +140,7 @@ func (g *github) Start() *github {
 func NewGithub(connectionString string) IProvider {
 	g := github{
 		provider: provider{
+			driver:           "github",
 			connectionString: connectionString,
 			url:              "https://api.github.com",
 		},

@@ -120,6 +120,7 @@ func (g *gitlab) Start() *gitlab {
 func NewGitlab(connectionString string) IProvider {
 	g := gitlab{
 		provider: provider{
+			driver:           "gitlab",
 			connectionString: connectionString,
 			url:              "https://gitlab.com/api/v4",
 		},
