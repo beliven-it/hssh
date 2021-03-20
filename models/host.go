@@ -111,7 +111,6 @@ func (h *host) Parse(channel *chan Connection) {
 			continue
 		}
 		h.connections = append(h.connections, h.ParseRow(host))
-
 	}
 
 	go h.provideViaChannel(channel)
