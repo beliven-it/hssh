@@ -92,7 +92,9 @@ func (h *host) Parse(channel *chan Connection) {
 		}
 
 		if channel != nil {
-			*channel <- connection
+			go func() {
+				*channel <- connection
+			}()
 		}
 	}
 
