@@ -20,7 +20,7 @@ func Connect(host string) {
 			os.Exit(0)
 		}
 
-		connection := fromFzfSelectionToConnection(connectionString, &connections)
+		connection := searchConnectionByPattern(connectionString, &connections)
 
 		host = connection.Name
 	}

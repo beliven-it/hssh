@@ -31,8 +31,9 @@ func PrintConnection(connection *models.Connection, withColors bool) {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
 	if withColors {
-		fmt.Printf("%s -> %s@%s:%s %s\n", green(connection.Name), connection.User, connection.Hostname, red(connection.Port), yellow(connection.IdentityFile))
+		fmt.Printf("%s -> %s@%s:%s %s\n", green(connection.Name), blue(connection.User), connection.Hostname, red(connection.Port), yellow(connection.IdentityFile))
 	} else {
 		fmt.Printf("%s -> %s@%s:%s %s\n", connection.Name, connection.User, connection.Hostname, connection.Port, connection.IdentityFile)
 	}
@@ -74,13 +75,13 @@ func ssh(connectionName string) {
 	}
 }
 
-func fromFzfSelectionToConnection(selection string, connections *[]models.Connection) models.Connection {
+func searchConnectionByPattern(pattern string, connections *[]models.Connection) models.Connection {
 	clearRgx := regexp.MustCompile("(\\n|\\r)")
 	takeNameRgx := regexp.MustCompile(" ->.*")
-	selection = clearRgx.ReplaceAllString(selection, "")
-	selection = takeNameRgx.ReplaceAllString(selection, "")
+	pattern = clearRgx.ReplaceAllString(pattern, "")
+	pattern = takeNameRgx.ReplaceAllString(pattern, "")
 	for _, connection := range *connections {
-		if connection.Name == selection {
+		if connection.Name == pattern {
 			return connection
 		}
 	}

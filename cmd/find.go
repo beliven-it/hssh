@@ -15,7 +15,13 @@ var findCmd = &cobra.Command{
 		controllers.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		connection := controllers.Find()
+		var host string
+		if len(args) > 0 {
+			host = args[0]
+		}
+
+		connection := controllers.Find(host)
+
 		controllers.PrintConnectionDetails(&connection)
 	},
 }
