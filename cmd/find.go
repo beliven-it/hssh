@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"hssh/controllers"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +23,10 @@ var findCmd = &cobra.Command{
 		}
 
 		connection := controllers.Find(host)
+		if connection.Name == "" {
+			fmt.Println("Cannot find the details of the host.\nRetry using fuzzysearch:\n\nhssh find")
+			os.Exit(0)
+		}
 
 		controllers.PrintConnectionDetails(&connection)
 	},
