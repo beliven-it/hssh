@@ -18,6 +18,7 @@ type ISSHConfig interface {
 	GetIncludes() []string
 	GetContent() string
 	GetPath() string
+	SetContent(string)
 }
 
 func (s *sshconfig) translatePath(path string) string {
@@ -40,12 +41,12 @@ func (s *sshconfig) translatePath(path string) string {
 }
 
 func (s *sshconfig) takeIncludes() []string {
-	rgx := regexp.MustCompile("(?m)^Include (.*)$")
+	rgx := regexp.MustCompile("(?m)^(\\s+|)Include (.*)$")
 	includes := rgx.FindAllStringSubmatch(s.content, -1)
 
 	includesList := []string{}
 	for _, include := range includes {
-		includesList = append(includesList, s.translatePath(include[1]))
+		includesList = append(includesList, s.translatePath(include[2]))
 	}
 
 	return includesList
@@ -58,7 +59,7 @@ func (s *sshconfig) readFile() {
 		os.Exit(1)
 	}
 
-	s.content = string(content)
+	s.SetContent(string(content))
 	s.filesToInclude = s.takeIncludes()
 }
 
@@ -72,6 +73,10 @@ func (s *sshconfig) GetIncludes() []string {
 
 func (s *sshconfig) GetPath() string {
 	return s.path
+}
+
+func (s *sshconfig) SetContent(content string) {
+	s.content = content
 }
 
 // NewSSHConfig ...

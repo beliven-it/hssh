@@ -11,7 +11,7 @@ func TestHostParse(t *testing.T) {
     Port 1234`
 
 	i := NewHost("")
-	connection := i.Parse(hostRaw)
+	connection := i.ParseRow(hostRaw)
 
 	if connection.Name != "test" {
 		t.Errorf("The connection must have the name test and not %s", connection.Name)
