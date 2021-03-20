@@ -57,6 +57,38 @@ SSH host example:
     IdentityFile ~/ssh/id_rsa
 ```
 
+### Providers
+HSSH can fetch host files from different providers. To allow HSSH to connect a provider,
+you must provide a valid connection string in the form:
+
+<p align='center'>
+<img src='./assets/provider.png' />
+</p>
+
+- **driver** is the provider name, like **github** or **gitlab**.
+- **access_token** is the access token use to connect to provider. It's required for access to private repositories.
+- **entity_id** is the reference of the entity to connect. See below for further informations.
+- **subpath** is the path where the resource are saved. See below for further informations.
+
+#### Gitlab
+##### Entity ID
+You must use the project ID found under the project name. For example:
+![gitlab project id](./assets/example_project_id_gitlab.jpg)
+
+A final example could be:
+
+`gitlab://my_token:/7192789`
+
+#### Github
+##### Entity ID
+You must use the path name of your repository. For example:
+![gitlab project id](./assets/example_project_id_github.jpg)
+
+A final example could be:
+
+`gitlab://my_token:/heply/hssh`
+
+
 ## Usage
 
 To see available commands and options, run: `hssh` or `hssh -h`
