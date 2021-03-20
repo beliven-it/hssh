@@ -9,17 +9,20 @@ import (
 
 // Host ...
 type host struct {
-	path    string
-	content string
+	path        string
+	content     string
+	connections []Connection
+	channel     chan Connection
 }
 
 // IHost ...
 type IHost interface {
 	ReadFile()
-	Parse(string) Connection
-	List(*chan Connection)
+	ParseRow(string) Connection
+	Parse(*chan Connection)
 	GetPath() string
 	GetContent() string
+	GetConnections() []Connection
 	Create([]byte) error
 }
 
@@ -51,7 +54,7 @@ func (h *host) Create(content []byte) error {
 	return nil
 }
 
-func (h *host) Parse(hostRaw string) Connection {
+func (h *host) ParseRow(hostRaw string) Connection {
 	connection := Connection{}
 	for _, attribute := range strings.Split(hostRaw, "\n") {
 		attribute = strings.Trim(attribute, " ")
@@ -68,7 +71,7 @@ func (h *host) Parse(hostRaw string) Connection {
 			connection.Port = strings.ReplaceAll(attribute, "Port ", "")
 		} else if strings.Contains(attribute, "IdentityFile") {
 			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile ", "")
-		} else {
+		} else if strings.Contains(attribute, "Host ") {
 			connection.Name = strings.ReplaceAll(attribute, "Host ", "")
 		}
 	}
@@ -76,7 +79,20 @@ func (h *host) Parse(hostRaw string) Connection {
 	return connection
 }
 
-func (h *host) List(channel *chan Connection) {
+func (h *host) provideViaChannel(channel *chan Connection) {
+	if channel == nil {
+		return
+	}
+
+	for _, connection := range h.connections {
+		go func(c Connection) {
+			*channel <- c
+		}(connection)
+
+	}
+}
+
+func (h *host) Parse(channel *chan Connection) {
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
@@ -85,23 +101,20 @@ func (h *host) List(channel *chan Connection) {
 	// Remove empty lines
 	content = regexp.MustCompile("[\t\r\n]+").ReplaceAllString(content, "\n")
 
+	content = regexp.MustCompile("Host ").ReplaceAllString(content, "!!Host ")
+
 	// Split content into hosts
-	hosts := strings.Split(content, "Host ")
+	hosts := strings.Split(content, "!!")
 
 	for x, host := range hosts {
 		if x == 0 {
 			continue
 		}
+		h.connections = append(h.connections, h.ParseRow(host))
 
-		connection := h.Parse(host)
-
-		if channel != nil {
-			go func() {
-				*channel <- connection
-			}()
-		}
 	}
 
+	go h.provideViaChannel(channel)
 }
 
 func (h *host) GetPath() string {
@@ -110,6 +123,10 @@ func (h *host) GetPath() string {
 
 func (h *host) GetContent() string {
 	return h.content
+}
+
+func (h *host) GetConnections() []Connection {
+	return h.connections
 }
 
 // NewHost ...
