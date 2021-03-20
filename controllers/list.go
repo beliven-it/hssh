@@ -68,7 +68,7 @@ func List() []models.Connection {
 			defer wg.Done()
 			h := models.NewHost(f)
 			h.ReadFile()
-			h.List(&channel)
+			h.Parse(&channel)
 		}(file)
 	}
 
