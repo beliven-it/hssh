@@ -86,7 +86,7 @@ You must use the path name of your repository. For example:
 
 A final example could be:
 
-`gitlab://my_token:/heply/hssh`
+`github://my_token:/heply/hssh`
 
 
 ## Usage
