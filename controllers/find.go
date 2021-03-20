@@ -6,16 +6,18 @@ import (
 )
 
 // Find ...
-func Find() models.Connection {
+func Find(host string) models.Connection {
 	connections := List()
 
-	commandVerbToExec := serializeConnections(&connections)
+	if host == "" {
+		commandVerbToExec := serializeConnections(&connections)
 
-	// Choose connection
-	connectionString := fzf(commandVerbToExec)
-	if connectionString == "" {
-		os.Exit(0)
+		// Choose connection
+		host = fzf(commandVerbToExec)
+		if host == "" {
+			os.Exit(0)
+		}
 	}
 
-	return fromFzfSelectionToConnection(connectionString, &connections)
+	return searchConnectionByPattern(host, &connections)
 }
