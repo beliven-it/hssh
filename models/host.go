@@ -16,7 +16,8 @@ type host struct {
 // IHost ...
 type IHost interface {
 	ReadFile()
-	Parse(*chan Connection)
+	Parse(string) Connection
+	List(*chan Connection)
 	GetPath() string
 	GetContent() string
 	Create([]byte) error
@@ -50,7 +51,35 @@ func (h *host) Create(content []byte) error {
 	return nil
 }
 
-func (h *host) Parse(channel *chan Connection) {
+func (h *host) Parse(hostRaw string) Connection {
+	hostRaw = strings.ReplaceAll(hostRaw, " ", "")
+
+	connection := Connection{}
+	for y, attribute := range strings.Split(hostRaw, "\n") {
+
+		if y == 0 {
+			connection.Name = attribute
+			continue
+		}
+
+		if strings.Contains(attribute, "Hostname") {
+			connection.Hostname = strings.ReplaceAll(attribute, "Hostname", "")
+		}
+		if strings.Contains(attribute, "User") {
+			connection.User = strings.ReplaceAll(attribute, "User", "")
+		}
+		if strings.Contains(attribute, "Port") {
+			connection.Port = strings.ReplaceAll(attribute, "Port", "")
+		}
+		if strings.Contains(attribute, "IdentityFile") {
+			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile", "")
+		}
+	}
+
+	return connection
+}
+
+func (h *host) List(channel *chan Connection) {
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
@@ -67,29 +96,7 @@ func (h *host) Parse(channel *chan Connection) {
 			continue
 		}
 
-		host = strings.ReplaceAll(host, " ", "")
-
-		connection := Connection{}
-		for y, attribute := range strings.Split(host, "\n") {
-
-			if y == 0 {
-				connection.Name = attribute
-				continue
-			}
-
-			if strings.Contains(attribute, "Hostname") {
-				connection.Hostname = strings.ReplaceAll(attribute, "Hostname", "")
-			}
-			if strings.Contains(attribute, "User") {
-				connection.User = strings.ReplaceAll(attribute, "User", "")
-			}
-			if strings.Contains(attribute, "Port") {
-				connection.Port = strings.ReplaceAll(attribute, "Port", "")
-			}
-			if strings.Contains(attribute, "IdentityFile") {
-				connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile", "")
-			}
-		}
+		connection := h.Parse(host)
 
 		if channel != nil {
 			go func() {
