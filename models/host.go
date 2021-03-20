@@ -52,27 +52,24 @@ func (h *host) Create(content []byte) error {
 }
 
 func (h *host) Parse(hostRaw string) Connection {
-	hostRaw = strings.ReplaceAll(hostRaw, " ", "")
-
 	connection := Connection{}
-	for y, attribute := range strings.Split(hostRaw, "\n") {
+	for _, attribute := range strings.Split(hostRaw, "\n") {
+		attribute = strings.Trim(attribute, " ")
 
-		if y == 0 {
-			connection.Name = attribute
+		if attribute == "" {
 			continue
 		}
 
 		if strings.Contains(attribute, "Hostname") {
-			connection.Hostname = strings.ReplaceAll(attribute, "Hostname", "")
-		}
-		if strings.Contains(attribute, "User") {
-			connection.User = strings.ReplaceAll(attribute, "User", "")
-		}
-		if strings.Contains(attribute, "Port") {
-			connection.Port = strings.ReplaceAll(attribute, "Port", "")
-		}
-		if strings.Contains(attribute, "IdentityFile") {
-			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile", "")
+			connection.Hostname = strings.ReplaceAll(attribute, "Hostname ", "")
+		} else if strings.Contains(attribute, "User") {
+			connection.User = strings.ReplaceAll(attribute, "User ", "")
+		} else if strings.Contains(attribute, "Port") {
+			connection.Port = strings.ReplaceAll(attribute, "Port ", "")
+		} else if strings.Contains(attribute, "IdentityFile") {
+			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile ", "")
+		} else {
+			connection.Name = strings.ReplaceAll(attribute, "Host ", "")
 		}
 	}
 
