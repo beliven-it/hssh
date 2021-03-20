@@ -1,5 +1,15 @@
 <p align='center'><img src='./assets/logo_small.svg' /></p>
 
+<p align='center'>
+<img src='https://img.shields.io/github/go-mod/go-version/heply/hssh?color=10bccd&style=for-the-badge' />
+<img src='https://img.shields.io/github/v/release/heply/hssh?color=10bccd&style=for-the-badge' />
+<img src='https://img.shields.io/github/license/heply/hssh?color=10bccd&style=for-the-badge' />
+</p>
+<p align='center'>
+<img src='https://img.shields.io/github/issues-pr/heply/hssh?color=10bccd&style=for-the-badge' />
+<img src='https://img.shields.io/github/issues/heply/hssh?color=10bccd&style=for-the-badge' />
+</p>
+
 A CLI to easily list, search and connect to SSH hosts. Sync down hosts from providers in order to get a centralized hosts configuration.
 
 ## Install
