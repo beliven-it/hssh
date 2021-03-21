@@ -12,7 +12,7 @@ var connectCmd = &cobra.Command{
 	Aliases: []string{"c"},
 	Short:   "Search and connect to host using fzf",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(false)
+		controllers.Init(-1, false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var host string

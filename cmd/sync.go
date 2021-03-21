@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"hssh/controllers"
 
 	"github.com/spf13/cobra"
@@ -12,9 +13,10 @@ var syncCmd = &cobra.Command{
 	Aliases: []string{"s"},
 	Short:   "Sync down hosts from the Git provider",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(false)
+		controllers.Init(2, false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("KK")
 		controllers.Sync()
 	},
 }
