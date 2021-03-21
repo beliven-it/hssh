@@ -14,7 +14,7 @@ var findCmd = &cobra.Command{
 	Aliases: []string{"f"},
 	Short:   "Find host details using fzf",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(-1, false)
+		controllers.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var host string

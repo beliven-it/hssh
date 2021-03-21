@@ -36,6 +36,11 @@ func (h *host) ReadFile() {
 }
 
 func (h *host) Create(content []byte) error {
+
+	filePathSplitted := strings.Split(h.path, "/")
+	folderPath := filePathSplitted[0 : len(filePathSplitted)-1]
+	err := os.MkdirAll(strings.Join(folderPath, "/"), os.ModePerm)
+
 	file, err := os.Create(h.path)
 	if err != nil {
 		return err
@@ -88,7 +93,6 @@ func (h *host) provideViaChannel(channel *chan Connection) {
 		go func(c Connection) {
 			*channel <- c
 		}(connection)
-
 	}
 }
 
