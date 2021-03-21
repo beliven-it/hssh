@@ -59,7 +59,23 @@ func MustBeConfigured() {
 func ViperLoadError(err error) {
 	fmt.Println(Color("black", "Error reading the configuration file:"))
 	fmt.Println(Color("red", err.Error()))
+	fmt.Println(Color("black", "If config.yml is missing run:\n"))
+	fmt.Println(Color("green", "hssh init\n"))
 	os.Exit(1)
+}
+
+// ProviderError ...
+func ProviderError(connectionString string, err error) {
+	fmt.Println(Color("red", err.Error()))
+	fmt.Println(Color("black", "Checkout the config file for errors."))
+	fmt.Println(Color("black", "Probabily the connection string is malformed"))
+	fmt.Println(Color("blue", "\n"+connectionString+"\n"))
+}
+
+//ProviderFetchError ...
+func ProviderFetchError(connectionString string, err error) {
+	fmt.Println(Color("black", "An error occured during files fetch"))
+	ProviderError(connectionString, err)
 }
 
 // Print ...
