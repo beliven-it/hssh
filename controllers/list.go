@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"hssh/config"
+	"hssh/messages"
 	"hssh/models"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -75,6 +77,11 @@ func List() []models.Connection {
 	wg.Wait()
 
 	time.Sleep(10 * time.Millisecond)
+
+	if len(connections) == 0 {
+		messages.NoConnections(connections)
+		os.Exit(0)
+	}
 
 	// Sort alphabetically (case insensitive).
 	sort.Slice(connections[:], func(i, j int) bool {

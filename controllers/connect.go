@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -16,7 +15,6 @@ func Connect(host string) {
 		// Choose connection
 		connectionString := fzf(commandVerbToExec)
 		if connectionString == "" {
-			fmt.Println("You have select nothing. Aborting connection.")
 			os.Exit(0)
 		}
 
