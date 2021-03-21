@@ -62,6 +62,11 @@ func ViperLoadError(err error) {
 	os.Exit(1)
 }
 
+// Print ...
+func Print(message string) {
+	fmt.Println(Color("blue", message))
+}
+
 // PrintStep ...
 func PrintStep(message string, err error) {
 	status := Color("green", "OK")
@@ -71,7 +76,7 @@ func PrintStep(message string, err error) {
 
 	stepStatus := Color("black", "[") + status + Color("black", "]")
 
-	fmt.Println(stepStatus, Color("white", " "+message))
+	fmt.Println(stepStatus, Color("white", message))
 	if err != nil {
 		fmt.Println(Color("red", err.Error()))
 		os.Exit(1)
