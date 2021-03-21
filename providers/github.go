@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -127,17 +126,17 @@ func (g *github) GetFile(repo string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *github) Start() *github {
+func (g *github) Start() (*github, error) {
 	_, err := g.provider.ParseConnection("github")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return g
+	return g, nil
 }
 
 // NewGithub ...
 /*............................................................................*/
-func NewGithub(connectionString string) IProvider {
+func NewGithub(connectionString string) (IProvider, error) {
 	g := github{
 		provider: provider{
 			driver:           "github",
