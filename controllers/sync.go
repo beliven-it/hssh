@@ -6,7 +6,6 @@ import (
 	"hssh/config"
 	"hssh/models"
 	"hssh/providers"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -33,35 +32,6 @@ func isFilePathInConfigSSH(content string, filePath string) bool {
 	return rgx.MatchString(content)
 }
 
-func upsertConfigSSH() error {
-	file, err := os.OpenFile(config.SSHConfigFilePath, os.O_RDWR, 0777)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	oldContent, err := ioutil.ReadFile(config.SSHConfigFilePath)
-	oldContentToString := string(oldContent)
-
-	delimiterStart := "# HSSH start managed"
-	delimiterEnd := "# HSSH end managed"
-	includeString := "Include " + config.HSSHHostFolderName + "/*"
-
-	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
-	if isFilePathInConfigSSH(oldContentToString, row) == true {
-		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n\n")
-		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
-	}
-
-	_, err = file.WriteString(row + oldContentToString)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func craftPath(filePath string) string {
 	paths := strings.Split(filePath, "/")
 	fileName := paths[len(paths)-1]
@@ -81,9 +51,6 @@ func syncWithProvider(providerConnection string) {
 		fmt.Println("Cannot get files from provider: " + err.Error())
 		os.Exit(1)
 	}
-
-	// Create the entity in .ssh/config
-	defer upsertConfigSSH()
 
 	var wg = new(sync.WaitGroup)
 

@@ -5,19 +5,53 @@ import (
 	"hssh/config"
 	"hssh/templates"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )
 
 const configInitializationStatusCode = 2
 
 func getStatusByError(err error) string {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
 	if err != nil {
-		return "NOK"
+		return red("NOK")
 	}
-	return "OK"
+	return green("OK")
+}
+
+func upsertConfigSSH() error {
+	file, err := os.OpenFile(config.SSHConfigFilePath, os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	oldContent, err := ioutil.ReadFile(config.SSHConfigFilePath)
+	oldContentToString := string(oldContent)
+
+	delimiterStart := "# HSSH start managed"
+	delimiterEnd := "# HSSH end managed"
+	includeString := "Include " + config.HSSHHostFolderName + "/*"
+
+	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
+	if isFilePathInConfigSSH(oldContentToString, row) == true {
+		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n\n")
+		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
+	}
+
+	_, err = file.WriteString(row + oldContentToString)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // InitSSHConfig check if file ~/.ssh/config
@@ -91,6 +125,7 @@ func CreateHSSHConfig(cb func(error, bool)) {
 // If not exist the file will created empty
 func CreateSSHConfig(cb func(error)) {
 	_, err := initRequiredHomeSpaceFile(config.SSHConfigFilePath, "")
+	upsertConfigSSH()
 	cb(err)
 }
 
