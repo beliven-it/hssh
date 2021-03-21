@@ -90,16 +90,6 @@ func CreateHSSHHostFolder(cb func(error)) {
 	cb(err)
 }
 
-// ExecuteFirstSync ...
-func ExecuteFirstSync(cb func(error)) {
-	isEmpty, err := isFolderEmpty(config.HSSHHostFolderPath)
-	if err != nil || isEmpty == true {
-		Sync()
-	}
-
-	cb(err)
-}
-
 // CreateHSSHConfig ...
 // Check or create configuration file (config.yml)
 func CreateHSSHConfig(cb func(error, bool)) {
@@ -163,11 +153,14 @@ func Init(force bool) {
 		func() {
 			CreateHSSHHostFolder(func(err error) {
 				messages.PrintStep(fmt.Sprintf("Folder %s", config.HSSHHostFolderPath), err)
-			})
-		},
-		func() {
-			ExecuteFirstSync(func(err error) {
-				messages.PrintStep(fmt.Sprintf("Automatic Sync"), err)
+				isEmpty, err := isFolderEmpty(config.HSSHHostFolderPath)
+				if err != nil || isEmpty == true {
+					Sync()
+					messages.PrintStep(fmt.Sprintf("Automatic Sync"), err)
+				} else {
+					messages.Print("Folder is not empty. The automatic sync will be ignored\n")
+				}
+
 			})
 		},
 	}
