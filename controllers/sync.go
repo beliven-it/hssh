@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"hssh/config"
+	"hssh/messages"
 	"hssh/models"
 	"hssh/providers"
 	"os"
@@ -44,11 +45,15 @@ func craftPath(filePath string) string {
 func syncWithProvider(providerConnection string) {
 	projectID, remotePath, err := getProjectIDAndPath(providerConnection)
 
-	provider := providers.New(providerConnection)
+	provider, err := providers.New(providerConnection)
+	if err != nil {
+		messages.ProviderError(providerConnection, err)
+		os.Exit(1)
+	}
 
 	files, err := provider.GetFiles(projectID, remotePath)
 	if err != nil {
-		fmt.Println("Cannot get files from provider: " + err.Error())
+		messages.ProviderFetchError(providerConnection, err)
 		os.Exit(1)
 	}
 

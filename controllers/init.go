@@ -126,13 +126,12 @@ func Init(force bool) {
 		os.Exit(0)
 	}
 
-	viper.SetConfigFile(config.HSSHConfigFilePath)
-	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err != nil {
-		messages.ViperLoadError(err)
-	}
-
 	if force == false && isInit == true {
+		viper.SetConfigFile(config.HSSHConfigFilePath)
+		viper.AutomaticEnv()
+		if err := viper.ReadInConfig(); err != nil {
+			messages.ViperLoadError(err)
+		}
 		return
 	}
 
