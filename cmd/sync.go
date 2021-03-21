@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"hssh/controllers"
 
 	"github.com/spf13/cobra"
@@ -16,7 +15,6 @@ var syncCmd = &cobra.Command{
 		controllers.Init(2, false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("KK")
 		controllers.Sync()
 	},
 }
