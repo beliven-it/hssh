@@ -21,6 +21,7 @@ var listCmd = &cobra.Command{
 		for _, connection := range connections {
 			controllers.PrintConnection(&connection, colors)
 		}
+
 	},
 }
 
