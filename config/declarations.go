@@ -18,3 +18,6 @@ var HSSHHostFolderPath = SSHFolderPath + "/" + HSSHHostFolderName
 
 // HSSHConfigFilePath ...
 var HSSHConfigFilePath = HomePath + "/.config/hssh/config.yml"
+
+// InitializedFilePath ...
+var InitializedFilePath = HomePath + "/.config/hssh/init"

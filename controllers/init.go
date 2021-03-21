@@ -129,20 +129,36 @@ func CreateSSHConfig(cb func(error)) {
 	cb(err)
 }
 
+func isHSSHInitialized() bool {
+	if _, err := os.Stat(config.InitializedFilePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 // Init ...
-func Init(steps int, verbose bool) {
+func Init(force bool) {
+
+	isInit := isHSSHInitialized()
+	if force == false && isInit == false {
+		fmt.Println("Actually seems HSSH configuration is not finished.\nPlease run the command:\n\nhssh init")
+		os.Exit(0)
+	}
+
+	if isInit == true {
+		viper.SetConfigFile(config.HSSHConfigFilePath)
+		viper.AutomaticEnv()
+		if err := viper.ReadInConfig(); err != nil {
+			fmt.Printf("Error reading config file: %v.\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	actions := []func(){
 		func() {
 			CreateHSSHConfig(func(err error, isNotConfigured bool) {
-				viper.SetConfigFile(config.HSSHConfigFilePath)
-				viper.AutomaticEnv()
-				if err := viper.ReadInConfig(); err != nil {
-					fmt.Printf("Error reading config file: %v.\n", err)
-					os.Exit(1)
-				}
-				if verbose {
-					fmt.Printf("[%s] File %s.\n", getStatusByError(err), config.HSSHConfigFilePath)
-				}
+				fmt.Printf("[%s] File %s.\n", getStatusByError(err), config.HSSHConfigFilePath)
 				if err != nil {
 					fmt.Printf("%s\n", err.Error())
 					os.Exit(1)
@@ -150,14 +166,11 @@ func Init(steps int, verbose bool) {
 				if isNotConfigured == true {
 					fmt.Printf("NOTE! The file must be configured before using the application.\n")
 				}
-
 			})
 		},
 		func() {
 			CreateSSHConfig(func(err error) {
-				if verbose {
-					fmt.Printf("[%s] File %s.\n", getStatusByError(err), config.SSHConfigFilePath)
-				}
+				fmt.Printf("[%s] File %s.\n", getStatusByError(err), config.SSHConfigFilePath)
 				if err != nil {
 					fmt.Printf("%s\n", err.Error())
 					os.Exit(1)
@@ -166,9 +179,7 @@ func Init(steps int, verbose bool) {
 		},
 		func() {
 			CreateHSSHHostFolder(func(err error) {
-				if verbose {
-					fmt.Printf("[%s] Folder %s.\n", getStatusByError(err), config.HSSHHostFolderPath)
-				}
+				fmt.Printf("[%s] Folder %s.\n", getStatusByError(err), config.HSSHHostFolderPath)
 				if err != nil {
 					fmt.Printf("%s\n", err.Error())
 					os.Exit(1)
@@ -177,9 +188,7 @@ func Init(steps int, verbose bool) {
 		},
 		func() {
 			ExecuteFirstSync(func(err error) {
-				if verbose {
-					fmt.Printf("[%s] First Sync.\n", getStatusByError(err))
-				}
+				fmt.Printf("[%s] First Sync.\n", getStatusByError(err))
 				if err != nil {
 					fmt.Printf("%s\n", err.Error())
 					os.Exit(1)
@@ -188,11 +197,9 @@ func Init(steps int, verbose bool) {
 		},
 	}
 
-	if steps >= 0 {
-		actions = actions[0 : steps+1]
-	}
-
 	for _, action := range actions {
 		action()
 	}
+
+	initRequiredHomeSpaceFile(config.InitializedFilePath, "")
 }

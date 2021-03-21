@@ -12,7 +12,7 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"l"},
 	Short:   "List all available hosts",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(-1, false)
+		controllers.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		colors, _ := cmd.Flags().GetBool("colors")
