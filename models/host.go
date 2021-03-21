@@ -101,6 +101,7 @@ func (h *host) Parse(channel *chan Connection) {
 	// Remove empty lines
 	content = regexp.MustCompile("[\t\r\n]+").ReplaceAllString(content, "\n")
 
+	// Apply a marker for splitting logic
 	content = regexp.MustCompile("Host ").ReplaceAllString(content, "!!Host ")
 
 	// Split content into hosts
