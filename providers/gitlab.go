@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -106,18 +105,18 @@ func (g *gitlab) GetFile(projectID string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *gitlab) Start() *gitlab {
+func (g *gitlab) Start() (*gitlab, error) {
 	_, err := g.provider.ParseConnection("gitlab")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return g
+	return g, nil
 }
 
 // NewGitlab ...
 /*............................................................................*/
-func NewGitlab(connectionString string) IProvider {
+func NewGitlab(connectionString string) (IProvider, error) {
 	g := gitlab{
 		provider: provider{
 			driver:           "gitlab",
