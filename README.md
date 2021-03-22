@@ -92,7 +92,7 @@ A final example could be:
 
 ## Usage
 
-To see available commands and options, run: `hssh` or `hssh -h`
+To see available commands and options, run: `hssh` or `hssh -h`.
 
 ## Development
 

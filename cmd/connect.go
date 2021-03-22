@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// connectCmd represents the connect command
 var connectCmd = &cobra.Command{
 	Use:     "connect",
 	Aliases: []string{"c"},

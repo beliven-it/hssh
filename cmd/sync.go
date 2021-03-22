@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
 var syncCmd = &cobra.Command{
 	Use:     "sync",
 	Aliases: []string{"s"},

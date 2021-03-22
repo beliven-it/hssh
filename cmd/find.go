@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
 var findCmd = &cobra.Command{
 	Use:     "find",
 	Aliases: []string{"f"},
