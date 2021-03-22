@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:     "init",
 	Aliases: []string{"i"},
