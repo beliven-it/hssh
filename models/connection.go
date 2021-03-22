@@ -7,4 +7,5 @@ type Connection struct {
 	User         string
 	Port         string
 	IdentityFile string
+	isLast       bool
 }

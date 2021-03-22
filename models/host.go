@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 // Host ...
@@ -19,10 +20,12 @@ type host struct {
 type IHost interface {
 	ReadFile()
 	ParseRow(string) Connection
-	Parse(*chan Connection)
+	Parse()
 	GetPath() string
 	GetContent() string
+	GetConnectionsCount() int
 	GetConnections() []Connection
+	ProvideViaChannel(*chan Connection)
 	Create([]byte) error
 }
 
@@ -84,7 +87,7 @@ func (h *host) ParseRow(hostRaw string) Connection {
 	return connection
 }
 
-func (h *host) provideViaChannel(channel *chan Connection) {
+func (h *host) ProvideViaChannel(channel *chan Connection) {
 	if channel == nil {
 		return
 	}
@@ -96,7 +99,10 @@ func (h *host) provideViaChannel(channel *chan Connection) {
 	}
 }
 
-func (h *host) Parse(channel *chan Connection) {
+func (h *host) Parse() {
+	var channel = make(chan Connection)
+	var wg = new(sync.WaitGroup)
+
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
@@ -111,14 +117,25 @@ func (h *host) Parse(channel *chan Connection) {
 	// Split content into hosts
 	hosts := strings.Split(content, "!!")
 
+	go func() {
+		for connection := range channel {
+			h.connections = append(h.connections, connection)
+			wg.Done()
+		}
+	}()
+
 	for x, host := range hosts {
 		if x == 0 {
 			continue
 		}
-		h.connections = append(h.connections, h.ParseRow(host))
+		wg.Add(1)
+		go func(hst string) {
+			channel <- h.ParseRow(hst)
+		}(host)
 	}
 
-	go h.provideViaChannel(channel)
+	wg.Wait()
+	close(channel)
 }
 
 func (h *host) GetPath() string {
@@ -131,6 +148,10 @@ func (h *host) GetContent() string {
 
 func (h *host) GetConnections() []Connection {
 	return h.connections
+}
+
+func (h *host) GetConnectionsCount() int {
+	return len(h.connections)
 }
 
 // NewHost ...
