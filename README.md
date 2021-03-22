@@ -72,7 +72,6 @@ you must provide a valid connection string in the form:
 - **subpath** is the path where the resource are saved. See below for further informations.
 
 #### Gitlab
-
 ##### Entity ID
 You must use the project ID found under the project name. For example:
 ![gitlab project id](./assets/example_project_id_gitlab.jpg)
