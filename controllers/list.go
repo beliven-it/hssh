@@ -35,11 +35,8 @@ func unique(arr []string) []string {
 // List the connections available
 func List() []models.Connection {
 	var wg = new(sync.WaitGroup)
-	var channel = make(chan models.Connection)
 	var connections []models.Connection
 	var filesToRead = []string{config.SSHConfigFilePath}
-
-	go waitForParsedConnections(&connections, &channel)
 
 	sshConfigInstance := models.NewSSHConfig(config.SSHConfigFilePath)
 	filesToInclude := sshConfigInstance.GetIncludes()
@@ -64,19 +61,29 @@ func List() []models.Connection {
 
 	filesToRead = unique(filesToRead)
 
-	for _, file := range filesToRead {
+	conns := [][]models.Connection{}
+
+	for i, file := range filesToRead {
 		wg.Add(1)
-		go func(f string) {
+		conns = append(conns, []models.Connection{})
+		var channel = make(chan models.Connection)
+
+		go func(f string, ch *chan models.Connection, index int) {
 			defer wg.Done()
+			go waitForParsedConnections(&conns[index], &channel)
 			h := models.NewHost(f)
 			h.ReadFile()
-			h.Parse(&channel)
-		}(file)
+			h.Parse(ch)
+		}(file, &channel, i)
 	}
 
 	wg.Wait()
 
 	time.Sleep(10 * time.Millisecond)
+
+	for _, conn := range conns {
+		connections = append(connections, conn...)
+	}
 
 	if len(connections) == 0 {
 		messages.NoConnections(connections)
