@@ -12,9 +12,10 @@ import (
 	"time"
 )
 
-func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection) {
+func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection, wg *sync.WaitGroup) {
 	for connection := range *channel {
 		*connections = append(*connections, connection)
+		wg.Done()
 	}
 }
 
@@ -62,27 +63,29 @@ func List() []models.Connection {
 	filesToRead = unique(filesToRead)
 
 	conns := [][]models.Connection{}
+	chans := []chan models.Connection{}
 
 	for i, file := range filesToRead {
-		wg.Add(1)
 		conns = append(conns, []models.Connection{})
-		var channel = make(chan models.Connection)
+		chans = append(chans, make(chan models.Connection))
 
 		go func(f string, ch *chan models.Connection, index int) {
-			defer wg.Done()
-			go waitForParsedConnections(&conns[index], &channel)
+			go waitForParsedConnections(&conns[index], ch, wg)
 			h := models.NewHost(f)
 			h.ReadFile()
-			h.Parse(ch)
-		}(file, &channel, i)
+			h.Parse()
+			wg.Add(h.GetConnectionsCount())
+
+			h.ProvideViaChannel(ch)
+		}(file, &chans[i], i)
 	}
 
+	time.Sleep(10 * time.Millisecond)
 	wg.Wait()
 
-	time.Sleep(10 * time.Millisecond)
-
-	for _, conn := range conns {
-		connections = append(connections, conn...)
+	for i := 0; i < len(conns); i++ {
+		connections = append(connections, conns[i]...)
+		close(chans[i])
 	}
 
 	if len(connections) == 0 {
