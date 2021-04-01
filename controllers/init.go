@@ -10,6 +10,8 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"syscall"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -110,23 +112,37 @@ func CreateSSHConfig(cb func(error)) {
 	cb(err)
 }
 
-func isHSSHInitialized() bool {
-	if _, err := os.Stat(config.InitializedFilePath); os.IsNotExist(err) {
-		return false
+func isHSSHInitialized() int {
+	info, err := os.Stat(config.HSSHConfigFilePath)
+	if err != nil {
+		return 1
 	}
-	return true
+	updatedAt := info.ModTime()
+	openedAt := info.Sys().(*syscall.Stat_t).Atim
+	openedAtUnixTime := time.Unix(openedAt.Sec, openedAt.Nsec)
+
+	if openedAtUnixTime.Equal(updatedAt) {
+		return 2
+	}
+
+	return 0
 }
 
 // Init ...
 func Init(force bool) {
 
 	isInit := isHSSHInitialized()
-	if force == false && isInit == false {
+	if force == false && isInit == 1 {
 		messages.NoConfiguredYet()
 		os.Exit(0)
 	}
 
-	if force == false && isInit == true {
+	if force == false && isInit == 2 {
+		messages.ConfigNotEditedYet()
+		os.Exit(0)
+	}
+
+	if force == false && isInit == 0 {
 		viper.SetConfigFile(config.HSSHConfigFilePath)
 		viper.AutomaticEnv()
 		if err := viper.ReadInConfig(); err != nil {
@@ -168,5 +184,4 @@ func Init(force bool) {
 		action()
 	}
 
-	initRequiredHomeSpaceFile(config.InitializedFilePath, "")
 }
