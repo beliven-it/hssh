@@ -48,6 +48,8 @@ func NoConnection() {
 func ConfigNotEditedYet() {
 	fmt.Println(Color("black", "\nHSSH configuration is not yet finished. Take time to configure the provider option\n"))
 	fmt.Println(Color("green", "~/.config/hssh/config.yml"))
+	fmt.Println(Color("black", "\nIf file doesn't exist run:\n"))
+	fmt.Println(Color("green", "hssh init"))
 }
 
 // NoConfiguredYet ...
