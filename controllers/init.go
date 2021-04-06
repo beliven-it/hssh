@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"crypto/md5"
 	"fmt"
 	"hssh/config"
 	"hssh/messages"
@@ -10,8 +11,6 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"syscall"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -112,37 +111,26 @@ func CreateSSHConfig(cb func(error)) {
 	cb(err)
 }
 
-func isHSSHInitialized() int {
-	info, err := os.Stat(config.HSSHConfigFilePath)
+func isHSSHInitialized() bool {
+	h := md5.New()
+	file, err := os.ReadFile(config.HSSHConfigFilePath)
 	if err != nil {
-		return 1
-	}
-	updatedAt := info.ModTime()
-	openedAt := info.Sys().(*syscall.Stat_t).Atim
-	openedAtUnixTime := time.Unix(openedAt.Sec, openedAt.Nsec)
-
-	if openedAtUnixTime.Equal(updatedAt) {
-		return 2
+		return false
 	}
 
-	return 0
+	return string(h.Sum(file)) != string(h.Sum([]byte(templates.Config)))
 }
 
 // Init ...
 func Init(force bool) {
 
 	isInit := isHSSHInitialized()
-	if force == false && isInit == 1 {
-		messages.NoConfiguredYet()
-		os.Exit(0)
-	}
-
-	if force == false && isInit == 2 {
+	if force == false && isInit == false {
 		messages.ConfigNotEditedYet()
 		os.Exit(0)
 	}
 
-	if force == false && isInit == 0 {
+	if force == false && isInit == true {
 		viper.SetConfigFile(config.HSSHConfigFilePath)
 		viper.AutomaticEnv()
 		if err := viper.ReadInConfig(); err != nil {
