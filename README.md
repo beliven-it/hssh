@@ -1,5 +1,6 @@
-<p align="center" style="margin-bottom: 25px; margin-top: 25px;"><img src="./assets/hssh.svg" /></p>
-
+<br>
+<p align="center"><img src="./assets/hssh.svg" /></p>
+<br>
 <p align="center">
 <img src="https://img.shields.io/github/go-mod/go-version/heply/hssh?color=10bccd&style=for-the-badge" />
 <img src="https://img.shields.io/github/v/release/heply/hssh?color=10bccd&style=for-the-badge" />
@@ -40,7 +41,8 @@ Right now the CLI supports the following providers:
 
 Provide at least one connection string to a provider to start using the CLI. You can use more providers at the same time. Replace values as reported below.
 
-<p align="center" style="margin-top: 30px;">
+<br>
+<p align="center">
 <img src="./assets/provider.svg" />
 </p>
 
