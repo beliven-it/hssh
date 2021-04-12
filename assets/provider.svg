@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1290px" height="330px" viewBox="0 0 1290 330" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>Provider</title>
+    <title>provider</title>
     <defs>
         <rect id="path-1" x="0" y="0" width="1200" height="240"></rect>
         <filter x="-6.9%" y="-21.9%" width="113.8%" height="168.8%" filterUnits="objectBoundingBox" id="filter-2">
@@ -9,8 +9,8 @@
             <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.298371688 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
         </filter>
     </defs>
-    <g id="Provider" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Container" transform="translate(45.000000, 15.000000)">
+    <g id="container" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="provider" transform="translate(45.000000, 15.000000)">
             <g id="Box">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
                 <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
