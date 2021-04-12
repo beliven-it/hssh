@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/spf13/viper"
 )
 
 // PrintConnectionDetails ...
@@ -49,8 +50,9 @@ func serializeConnections(connections *[]models.Connection) string {
 }
 
 func fzf(context string) string {
+	cmdOptions := viper.GetString("fuzzysearch_options")
 	cmdOutput := &bytes.Buffer{}
-	c := exec.Command("bash", "-c", "echo -e '"+context+"' | fzf")
+	c := exec.Command("bash", "-c", "echo -e '"+context+"' | fzf "+cmdOptions)
 	c.Stdout = cmdOutput
 	c.Stderr = os.Stderr
 	c.Stdin = os.Stdin
