@@ -2,7 +2,7 @@ package templates
 
 // Config template
 var Config = `# HSSH configuration file
-fzfsearch_options: ""
+fzf_options: ""
 providers:
   - "<PROVIDER>://<ACCESS_TOKEN>:/<ENTITY_ID>@<SUBPATH>"
 `
