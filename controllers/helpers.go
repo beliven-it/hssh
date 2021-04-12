@@ -50,7 +50,7 @@ func serializeConnections(connections *[]models.Connection) string {
 }
 
 func fzf(context string) string {
-	cmdOptions := viper.GetString("fuzzysearch_options")
+	cmdOptions := viper.GetString("fzf_options")
 	cmdOutput := &bytes.Buffer{}
 	c := exec.Command("bash", "-c", "echo -e '"+context+"' | fzf "+cmdOptions)
 	c.Stdout = cmdOutput
