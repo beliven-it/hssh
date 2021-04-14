@@ -106,7 +106,7 @@ func (h *host) Parse() {
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
-	content = regexp.MustCompile("(?m)^#.*").ReplaceAllString(content, "")
+	content = regexp.MustCompile("(?m)^(|\\s+)#.*").ReplaceAllString(content, "")
 
 	// Remove empty lines
 	content = regexp.MustCompile("[\t\r\n]+").ReplaceAllString(content, "\n")
