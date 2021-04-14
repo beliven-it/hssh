@@ -12,9 +12,21 @@ import (
 	"time"
 )
 
+func isBlackListed(hostname string, blacklist []string) bool {
+	for _, b := range blacklist {
+		if b == hostname {
+			return true
+		}
+	}
+
+	return false
+}
+
 func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection, wg *sync.WaitGroup) {
 	for connection := range *channel {
-		*connections = append(*connections, connection)
+		if isBlackListed(connection.Name, []string{"*"}) == false {
+			*connections = append(*connections, connection)
+		}
 		wg.Done()
 	}
 }
