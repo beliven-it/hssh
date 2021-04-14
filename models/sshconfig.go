@@ -56,6 +56,7 @@ func (s *sshconfig) readFile() {
 	content, err := ioutil.ReadFile(s.path)
 	if err != nil {
 		fmt.Printf("File reading error: %v\n", err)
+		// TODO: Remove this exit and handle it in final side
 		os.Exit(1)
 	}
 
