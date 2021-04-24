@@ -14,7 +14,7 @@ import (
 
 func isBlackListed(hostname string, blacklist []string) bool {
 	for _, b := range blacklist {
-		if b == hostname {
+		if b == strings.Trim(hostname, " ") {
 			return true
 		}
 	}
@@ -24,7 +24,7 @@ func isBlackListed(hostname string, blacklist []string) bool {
 
 func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection, wg *sync.WaitGroup) {
 	for connection := range *channel {
-		if isBlackListed(connection.Name, []string{"*"}) == false {
+		if isBlackListed(connection.Name, []string{"*", ""}) == false {
 			*connections = append(*connections, connection)
 		}
 		wg.Done()
