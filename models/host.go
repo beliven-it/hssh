@@ -62,6 +62,11 @@ func (h *host) Create(content []byte) error {
 	return nil
 }
 
+func (h *host) getAttributeFromRow(attribute string, row string) string {
+	rgx := regexp.MustCompile(attribute + "(|\\s)")
+	return strings.Trim(rgx.ReplaceAllString(row, ""), " ")
+}
+
 func (h *host) ParseRow(hostRaw string) Connection {
 	connection := Connection{}
 	for _, attribute := range strings.Split(hostRaw, "\n") {
@@ -72,20 +77,15 @@ func (h *host) ParseRow(hostRaw string) Connection {
 		}
 
 		if strings.Contains(attribute, "Hostname") {
-			connection.Hostname = strings.ReplaceAll(attribute, "Hostname ", "")
-			connection.Hostname = strings.Trim(connection.Hostname, " ")
+			connection.Hostname = h.getAttributeFromRow("Hostname", attribute)
 		} else if strings.Contains(attribute, "User") {
-			connection.User = strings.ReplaceAll(attribute, "User ", "")
-			connection.User = strings.Trim(connection.User, " ")
+			connection.User = h.getAttributeFromRow("User", attribute)
 		} else if strings.Contains(attribute, "Port") {
-			connection.Port = strings.ReplaceAll(attribute, "Port ", "")
-			connection.Port = strings.Trim(connection.Port, " ")
+			connection.Port = h.getAttributeFromRow("Port", attribute)
 		} else if strings.Contains(attribute, "IdentityFile") {
-			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile ", "")
-			connection.IdentityFile = strings.Trim(connection.IdentityFile, " ")
+			connection.IdentityFile = h.getAttributeFromRow("IdentityFile", attribute)
 		} else if strings.Contains(attribute, "Host ") {
-			connection.Name = strings.ReplaceAll(attribute, "Host ", "")
-			connection.Name = strings.Trim(connection.Name, " ")
+			connection.Name = h.getAttributeFromRow("Host", attribute)
 		}
 	}
 
