@@ -13,4 +13,12 @@ func TestBlacklist(t *testing.T) {
 	if isBlacklist == false {
 		t.Errorf("The hostname must be blacklisted")
 	}
+	isBlacklist = isBlackListed("", []string{"*", ""})
+	if isBlacklist == false {
+		t.Errorf("The hostname must be blacklisted")
+	}
+	isBlacklist = isBlackListed(" ", []string{"*", ""})
+	if isBlacklist == false {
+		t.Errorf("The hostname must be blacklisted")
+	}
 }
