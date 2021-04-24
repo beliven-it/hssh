@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hssh/models"
 	"os"
+	"regexp"
 
 	"github.com/fatih/color"
 )
@@ -84,6 +85,27 @@ func ProviderError(connectionString string, err error) {
 func ProviderFetchError(connectionString string, err error) {
 	fmt.Println(Color("black", "An error occured during files fetch"))
 	ProviderError(connectionString, err)
+}
+
+// SyncFileCreation ...
+func SyncFileCreation(path string) {
+	rgx := regexp.MustCompile("(.*)\\.(.*)")
+	pathMatchs := rgx.FindAllStringSubmatch(path, 1)
+	body := pathMatchs[0][1]
+	extension := pathMatchs[0][2]
+
+	fmt.Println(Color("black", "[") + Color("green", "CREATED") + Color("black", "]") + " " + body + "." + Color("yellow", extension))
+}
+
+// SyncFileDeletion ...
+func SyncFileDeletion(path string) {
+	fmt.Println(Color("black", "[") + Color("red", "DELETED") + Color("black", "]") + " " + path)
+}
+
+// CannotDeleteFile ...
+func CannotDeleteFile(message, file string) {
+	fmt.Println(Color("black", "Cannot delete file"), Color("blue", file))
+	fmt.Println(Color("red", message))
 }
 
 // Print ...

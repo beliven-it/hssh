@@ -8,6 +8,7 @@ import (
 	"hssh/models"
 	"hssh/providers"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -42,7 +43,33 @@ func craftPath(filePath string) string {
 	return filePath
 }
 
-func syncWithProvider(providerConnection string) {
+func getObsoleteFiles(whitelist []string) []string {
+	files := []string{}
+	filepath.Walk(config.HSSHHostFolderPath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() == true {
+			return nil
+		}
+
+		match := false
+		for _, f := range whitelist {
+			if f == path {
+				match = true
+			}
+		}
+
+		if match == true {
+			return nil
+		}
+
+		files = append(files, path)
+
+		return nil
+	})
+
+	return files
+}
+
+func syncWithProvider(providerConnection string) []string {
 	projectID, remotePath, err := getProjectIDAndPath(providerConnection)
 
 	provider, err := providers.New(providerConnection)
@@ -59,6 +86,8 @@ func syncWithProvider(providerConnection string) {
 
 	var wg = new(sync.WaitGroup)
 
+	var filesCreated []string
+
 	for _, file := range files {
 
 		fileID := file.ID
@@ -66,7 +95,13 @@ func syncWithProvider(providerConnection string) {
 
 		wg.Add(1)
 		go func(path string, id string) {
-			defer wg.Done()
+			var hostPath string
+			defer func() {
+				if hostPath != "" {
+					filesCreated = append(filesCreated, hostPath)
+				}
+				wg.Done()
+			}()
 
 			fileContent, err := provider.GetFile(projectID, id)
 			if err != nil {
@@ -82,11 +117,14 @@ func syncWithProvider(providerConnection string) {
 				return
 			}
 
-			fmt.Println("File created:", host.GetPath())
-		}(filePath, fileID)
+			hostPath = host.GetPath()
 
+		}(filePath, fileID)
 	}
+
 	wg.Wait()
+
+	return filesCreated
 }
 
 // Sync ...
@@ -99,6 +137,8 @@ func Sync() {
 
 	var wg = new(sync.WaitGroup)
 
+	var filesCreated []string
+
 	for _, provider := range multiProvider {
 		wg.Add(1)
 		go func(p string) {
@@ -107,10 +147,22 @@ func Sync() {
 				return
 			}
 
-			syncWithProvider(p)
+			filesCreated = append(filesCreated, syncWithProvider(p)...)
 		}(provider)
 	}
 
 	wg.Wait()
 
+	for _, file := range filesCreated {
+		messages.SyncFileCreation(file)
+	}
+
+	obsoleteFiles := getObsoleteFiles(filesCreated)
+	for _, file := range obsoleteFiles {
+		messages.SyncFileDeletion(file)
+		err := os.Remove(file)
+		if err != nil {
+			messages.CannotDeleteFile(err.Error(), file)
+		}
+	}
 }
