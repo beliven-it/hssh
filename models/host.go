@@ -73,14 +73,19 @@ func (h *host) ParseRow(hostRaw string) Connection {
 
 		if strings.Contains(attribute, "Hostname") {
 			connection.Hostname = strings.ReplaceAll(attribute, "Hostname ", "")
+			connection.Hostname = strings.Trim(connection.Hostname, " ")
 		} else if strings.Contains(attribute, "User") {
 			connection.User = strings.ReplaceAll(attribute, "User ", "")
+			connection.User = strings.Trim(connection.User, " ")
 		} else if strings.Contains(attribute, "Port") {
 			connection.Port = strings.ReplaceAll(attribute, "Port ", "")
+			connection.Port = strings.Trim(connection.Port, " ")
 		} else if strings.Contains(attribute, "IdentityFile") {
 			connection.IdentityFile = strings.ReplaceAll(attribute, "IdentityFile ", "")
+			connection.IdentityFile = strings.Trim(connection.IdentityFile, " ")
 		} else if strings.Contains(attribute, "Host ") {
 			connection.Name = strings.ReplaceAll(attribute, "Host ", "")
+			connection.Name = strings.Trim(connection.Name, " ")
 		}
 	}
 
