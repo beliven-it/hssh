@@ -9,3 +9,13 @@ type Connection struct {
 	IdentityFile string
 	isLast       bool
 }
+
+// IsWellConfigured ...
+// Check if the connection is well configured
+func (c *Connection) IsWellConfigured() bool {
+	if c.Name == "" || c.Hostname == "" {
+		return false
+	}
+
+	return true
+}

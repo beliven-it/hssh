@@ -124,7 +124,9 @@ func (h *host) Parse() {
 
 	go func() {
 		for connection := range channel {
-			h.connections = append(h.connections, connection)
+			if connection.IsWellConfigured() == true {
+				h.connections = append(h.connections, connection)
+			}
 			wg.Done()
 		}
 	}()
