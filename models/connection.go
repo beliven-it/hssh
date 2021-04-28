@@ -19,3 +19,12 @@ func (c *Connection) IsWellConfigured() bool {
 
 	return true
 }
+
+// IsAllowed ...
+func (c *Connection) IsAllowed() bool {
+	if c.Name == "*" {
+		return false
+	}
+
+	return true
+}
