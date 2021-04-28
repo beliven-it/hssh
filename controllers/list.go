@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 )
 
 func unique(arr []string) []string {
@@ -27,7 +26,6 @@ func unique(arr []string) []string {
 
 // List the connections available
 func List() []models.Connection {
-	var wg = new(sync.WaitGroup)
 	var connections []models.Connection
 	var filesToRead = []string{config.SSHConfigFilePath}
 
@@ -55,17 +53,10 @@ func List() []models.Connection {
 	filesToRead = unique(filesToRead)
 
 	for _, file := range filesToRead {
-		wg.Add(1)
-		host := models.NewHost(file)
-		go func(h models.IHost) {
-			defer wg.Done()
-
-			h.ReadFile()
-			connections = append(connections, h.Parse()...)
-		}(host)
+		h := models.NewHost(file)
+		h.ReadFile()
+		connections = append(connections, h.Parse()...)
 	}
-
-	wg.Wait()
 
 	if len(connections) == 0 {
 		messages.NoConnections(connections)
