@@ -5,7 +5,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 // Host ...
@@ -20,7 +19,7 @@ type host struct {
 type IHost interface {
 	ReadFile()
 	ParseRow(string) Connection
-	Parse()
+	Parse() []Connection
 	GetPath() string
 	GetContent() string
 	GetConnectionsCount() int
@@ -104,10 +103,7 @@ func (h *host) ProvideViaChannel(channel *chan Connection) {
 	}
 }
 
-func (h *host) Parse() {
-	var channel = make(chan Connection)
-	var wg = new(sync.WaitGroup)
-
+func (h *host) Parse() []Connection {
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
@@ -122,27 +118,24 @@ func (h *host) Parse() {
 	// Split content into hosts
 	hosts := strings.Split(content, "!!")
 
-	go func() {
-		for connection := range channel {
-			if connection.IsWellConfigured() == true {
-				h.connections = append(h.connections, connection)
-			}
-			wg.Done()
-		}
-	}()
-
 	for x, host := range hosts {
 		if x == 0 {
 			continue
 		}
-		wg.Add(1)
-		go func(hst string) {
-			channel <- h.ParseRow(hst)
-		}(host)
+
+		connection := h.ParseRow(host)
+		if !connection.IsAllowed() {
+			continue
+		}
+
+		if !connection.IsWellConfigured() {
+			continue
+		}
+
+		h.connections = append(h.connections, connection)
 	}
 
-	wg.Wait()
-	close(channel)
+	return h.connections
 }
 
 func (h *host) GetPath() string {

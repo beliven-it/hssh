@@ -9,27 +9,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 )
-
-func isBlackListed(hostname string, blacklist []string) bool {
-	for _, b := range blacklist {
-		if b == strings.Trim(hostname, " ") {
-			return true
-		}
-	}
-
-	return false
-}
-
-func waitForParsedConnections(connections *[]models.Connection, channel *chan models.Connection, wg *sync.WaitGroup) {
-	for connection := range *channel {
-		if isBlackListed(connection.Name, []string{"*", ""}) == false {
-			*connections = append(*connections, connection)
-		}
-		wg.Done()
-	}
-}
 
 func unique(arr []string) []string {
 	occured := map[string]bool{}
@@ -74,31 +54,18 @@ func List() []models.Connection {
 
 	filesToRead = unique(filesToRead)
 
-	conns := [][]models.Connection{}
-	chans := []chan models.Connection{}
+	for _, file := range filesToRead {
+		wg.Add(1)
+		host := models.NewHost(file)
+		go func(h models.IHost) {
+			defer wg.Done()
 
-	for i, file := range filesToRead {
-		conns = append(conns, []models.Connection{})
-		chans = append(chans, make(chan models.Connection))
-
-		go func(f string, ch *chan models.Connection, index int) {
-			go waitForParsedConnections(&conns[index], ch, wg)
-			h := models.NewHost(f)
 			h.ReadFile()
-			h.Parse()
-			wg.Add(h.GetConnectionsCount())
-
-			h.ProvideViaChannel(ch)
-		}(file, &chans[i], i)
+			connections = append(connections, h.Parse()...)
+		}(host)
 	}
 
-	time.Sleep(10 * time.Millisecond)
 	wg.Wait()
-
-	for i := 0; i < len(conns); i++ {
-		connections = append(connections, conns[i]...)
-		close(chans[i])
-	}
 
 	if len(connections) == 0 {
 		messages.NoConnections(connections)
