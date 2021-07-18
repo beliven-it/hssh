@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "hssh/cmd"
+import (
+	"hssh/cmd"
+)
 
 func main() {
 	cmd.Execute()

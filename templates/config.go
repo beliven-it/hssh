@@ -4,5 +4,5 @@ package templates
 var Config = `# HSSH configuration file
 fzf_options: ""
 providers:
-  - "<PROVIDER>://<ACCESS_TOKEN>:/<ENTITY_ID>@<SUBPATH>"
+  - "<PROVIDER>://<ACCESS_TOKEN>:/<ENTITY_ID>@<SUBPATH>##<BRANCH>"
 `

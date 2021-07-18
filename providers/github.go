@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 )
 
 type githubFile struct {
@@ -18,6 +19,8 @@ type githubFile struct {
 
 type github struct {
 	provider
+	branch   string
+	filePath string
 }
 
 // get
@@ -126,12 +129,32 @@ func (g *github) GetFile(repo string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *github) Start() (*github, error) {
-	_, err := g.provider.ParseConnection("github")
+func (g *github) GetLatestUpdate(branch string) (string, error) {
+	endpoint := "/repos/" + g.entity + "/commits/" + g.branch
+	bodyInBytes, err := g.get(endpoint, []queryParam{})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return g, nil
+
+	fmt.Println(bodyInBytes)
+
+	return "", nil
+}
+
+func (g *github) parse() error {
+	rgx := regexp.MustCompile(`(.*):\/\/(.*?)(:/|\s)(.*?)(@|\s)(.*?)(##|\s)(.*)`)
+	result := rgx.FindAllStringSubmatch(g.connectionString, 1)
+
+	if len(result) == 0 || len(result[0]) < 2 {
+		return errors.New("Cannot extract token from connection string.\nThe connection string must follow the format:\n<driver>://<token>")
+	}
+
+	g.privateToken = result[0][2]
+	g.entity = result[0][4]
+	g.filePath = result[0][6]
+	g.branch = result[0][8]
+
+	return nil
 }
 
 // NewGithub ...
@@ -144,5 +167,6 @@ func NewGithub(connectionString string) (IProvider, error) {
 			url:              "https://api.github.com",
 		},
 	}
-	return g.Start()
+
+	return &g, g.parse()
 }

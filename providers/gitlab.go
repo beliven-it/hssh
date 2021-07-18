@@ -6,10 +6,13 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 )
 
 type gitlab struct {
 	provider
+	filePath string
+	branch   string
 }
 
 // get
@@ -105,13 +108,20 @@ func (g *gitlab) GetFile(projectID string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *gitlab) Start() (*gitlab, error) {
-	_, err := g.provider.ParseConnection("gitlab")
-	if err != nil {
-		return nil, err
+func (g *gitlab) parse() error {
+	rgx := regexp.MustCompile(`(.*):\/\/(.*?)(:/|\s)(.*?)(@|\s)(.*?)(##|\s)(.*)`)
+	result := rgx.FindAllStringSubmatch(g.connectionString, 1)
+
+	if len(result) == 0 || len(result[0]) < 2 {
+		return errors.New("Cannot extract token from connection string.\nThe connection string must follow the format:\n<driver>://<token>")
 	}
 
-	return g, nil
+	g.privateToken = result[0][2]
+	g.entity = result[0][4]
+	g.filePath = result[0][6]
+	g.branch = result[0][8]
+
+	return nil
 }
 
 // NewGitlab ...
@@ -124,5 +134,5 @@ func NewGitlab(connectionString string) (IProvider, error) {
 			url:              "https://gitlab.com/api/v4",
 		},
 	}
-	return g.Start()
+	return &g, g.parse()
 }
