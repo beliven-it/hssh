@@ -9,5 +9,4 @@ jobs:
       - uses: actions/checkout@v2
       - name: Test
         run: |
-          go test hssh/providers
-          go test hssh/models
+          go test ./...
