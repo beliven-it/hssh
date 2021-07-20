@@ -84,26 +84,20 @@ func syncWithProvider(providerConnection string) []string {
 		os.Exit(1)
 	}
 
-	var wg = new(sync.WaitGroup)
+	wg := new(sync.WaitGroup)
 
+	wg.Add(len(files))
 	var filesCreated []string
+	channel := make(chan string, len(files))
 
 	for _, file := range files {
-
-		fileID := file.ID
-		filePath := file.Path
-
-		wg.Add(1)
 		go func(path string, id string) {
-			var hostPath string
-			defer func() {
-				if hostPath != "" {
-					filesCreated = append(filesCreated, hostPath)
-				}
-				wg.Done()
-			}()
-
 			fileContent, err := provider.GetFile(projectID, id)
+			var hostPath string
+			defer func(hp string) {
+				channel <- hostPath
+			}(hostPath)
+
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -118,11 +112,21 @@ func syncWithProvider(providerConnection string) []string {
 			}
 
 			hostPath = host.GetPath()
-
-		}(filePath, fileID)
+			return
+		}(file.Path, file.ID)
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(channel)
+	}()
+
+	for c := range channel {
+		if c != "" {
+			filesCreated = append(filesCreated, c)
+		}
+		wg.Done()
+	}
 
 	return filesCreated
 }
@@ -135,23 +139,33 @@ func Sync() {
 	multiProvider = append(multiProvider, singleProvider)
 	multiProvider = unique(multiProvider)
 
-	var wg = new(sync.WaitGroup)
+	wg := new(sync.WaitGroup)
 
 	var filesCreated []string
+	channel := make(chan []string, len(multiProvider))
+
+	wg.Add(len(multiProvider))
 
 	for _, provider := range multiProvider {
-		wg.Add(1)
 		go func(p string) {
-			defer wg.Done()
 			if p == "" {
-				return
+				channel <- []string{}
+			} else {
+				channel <- syncWithProvider(p)
 			}
-
-			filesCreated = append(filesCreated, syncWithProvider(p)...)
+			return
 		}(provider)
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(channel)
+	}()
+
+	for c := range channel {
+		filesCreated = append(filesCreated, c...)
+		wg.Done()
+	}
 
 	for _, file := range filesCreated {
 		messages.SyncFileCreation(file)
