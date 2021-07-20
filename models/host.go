@@ -38,7 +38,6 @@ func (h *host) ReadFile() {
 }
 
 func (h *host) Create(content []byte) error {
-
 	filePathSplitted := strings.Split(h.path, "/")
 	folderPath := filePathSplitted[0 : len(filePathSplitted)-1]
 	err := os.MkdirAll(strings.Join(folderPath, "/"), os.ModePerm)
@@ -70,21 +69,22 @@ func (h *host) ParseRow(hostRaw string) Connection {
 	connection := Connection{}
 	for _, attribute := range strings.Split(hostRaw, "\n") {
 		attribute = strings.Trim(attribute, " ")
+		attribute = strings.ToLower(attribute)
 
 		if attribute == "" {
 			continue
 		}
 
-		if strings.Contains(attribute, "Hostname") {
-			connection.Hostname = h.getAttributeFromRow("Hostname", attribute)
-		} else if strings.Contains(attribute, "User") {
-			connection.User = h.getAttributeFromRow("User", attribute)
-		} else if strings.Contains(attribute, "Port") {
-			connection.Port = h.getAttributeFromRow("Port", attribute)
-		} else if strings.Contains(attribute, "IdentityFile") {
-			connection.IdentityFile = h.getAttributeFromRow("IdentityFile", attribute)
-		} else if strings.Contains(attribute, "Host ") {
-			connection.Name = h.getAttributeFromRow("Host", attribute)
+		if strings.Contains(attribute, "hostname") {
+			connection.Hostname = h.getAttributeFromRow("hostname", attribute)
+		} else if strings.Contains(attribute, "user") {
+			connection.User = h.getAttributeFromRow("user", attribute)
+		} else if strings.Contains(attribute, "port") {
+			connection.Port = h.getAttributeFromRow("port", attribute)
+		} else if strings.Contains(attribute, "identityfile") {
+			connection.IdentityFile = h.getAttributeFromRow("identityfile", attribute)
+		} else if strings.Contains(attribute, "host ") {
+			connection.Name = h.getAttributeFromRow("host", attribute)
 		}
 	}
 
