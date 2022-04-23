@@ -137,11 +137,16 @@ func (g *github) Start() (*github, error) {
 // NewGithub ...
 /*............................................................................*/
 func NewGithub(connectionString string) (IProvider, error) {
+	url := getOptionURLFromConnectionString(connectionString)
+	if url == "" {
+		url = "https://api.github.com"
+	}
+
 	g := github{
 		provider: provider{
 			driver:           "github",
 			connectionString: connectionString,
-			url:              "https://api.github.com",
+			url:              url,
 		},
 	}
 	return g.Start()

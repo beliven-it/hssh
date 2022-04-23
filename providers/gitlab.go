@@ -117,11 +117,16 @@ func (g *gitlab) Start() (*gitlab, error) {
 // NewGitlab ...
 /*............................................................................*/
 func NewGitlab(connectionString string) (IProvider, error) {
+	url := getOptionURLFromConnectionString(connectionString)
+	if url == "" {
+		url = "https://gitlab.com/api/v4"
+	}
+
 	g := gitlab{
 		provider: provider{
 			driver:           "gitlab",
 			connectionString: connectionString,
-			url:              "https://gitlab.com/api/v4",
+			url:              url,
 		},
 	}
 	return g.Start()
