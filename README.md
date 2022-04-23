@@ -36,6 +36,7 @@ Right now the CLI supports the following providers:
 
 - GitLab
 - GitHub
+- Heimdallr ([What is heimdallr?](https://github.com/heply/heimdallr))
 
 ### Providers
 
@@ -50,6 +51,17 @@ Provide at least one connection string to a provider to start using the CLI. You
 - **ACCESS_TOKEN** is the provider access token. Required only for private projects/repositories.
 - **ENTITY_ID** is the reference to the project/repository where the files are stored. For GitLab is the project ID, you can find it under the project name (eg. `7192789`). For GitHub is the name of the repository (eg. `heply/hssh`).
 - **SUBPATH** is the path to the folder inside the project/repository where config files are saved. This parameter is optional, if you want to store hosts files inside the root of the project/repository, you can delete the `@` and everything after it in the connection string.
+
+You can also override the main URL used by providers in this way:
+
+```
+providers:
+   - "heimdallr://my_access_token url:http://my-custom-domain/api"
+```
+
+The default values by providers are:
+- **Gitlab** https://gitlab.com/api/v4
+- **Github** https://api.github.com
 
 ### fzf options
 
