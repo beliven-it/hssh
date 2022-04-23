@@ -43,7 +43,7 @@ func PrintConnection(connection *models.Connection, withColors bool) {
 func serializeConnections(connections *[]models.Connection) string {
 	listOfConnectionsNames := []string{}
 	for _, connection := range *connections {
-		listOfConnectionsNames = append(listOfConnectionsNames, connection.Name+" -> "+connection.Hostname)
+		listOfConnectionsNames = append(listOfConnectionsNames, connection.Name+" -> "+connection.User+"@"+connection.Hostname)
 	}
 
 	return strings.Join(listOfConnectionsNames, "\n")

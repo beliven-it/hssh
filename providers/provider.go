@@ -86,7 +86,7 @@ func (p *provider) GetURL() string {
 
 func (p *provider) ParseConnection(driver string) (*provider, error) {
 
-	rgx := regexp.MustCompile("^" + driver + "://(.*?)(:/|$)")
+	rgx := regexp.MustCompile("^" + driver + "://(.*?)(:/| |$)")
 	result := rgx.FindAllStringSubmatch(p.connectionString, 1)
 
 	if len(result) == 0 || len(result[0]) < 2 {
@@ -96,6 +96,17 @@ func (p *provider) ParseConnection(driver string) (*provider, error) {
 	p.privateToken = result[0][1]
 
 	return p, nil
+}
+
+func getOptionURLFromConnectionString(connectionString string) string {
+	rgx := regexp.MustCompile(" url:(.*)(|$)")
+	result := rgx.FindAllStringSubmatch(connectionString, 1)
+
+	if len(result) == 0 {
+		return ""
+	}
+
+	return result[0][1]
 }
 
 func getDriverFromConnectionString(connectionString string) (string, error) {
@@ -122,6 +133,8 @@ func New(connectionString string) (IProvider, error) {
 		return NewGitlab(connectionString)
 	case "github":
 		return NewGithub(connectionString)
+	case "heimdallr":
+		return NewHeimdallr(connectionString)
 	default:
 		return nil, errors.New("Invalid driver provider " + driver)
 	}
