@@ -40,3 +40,17 @@ func TestHostParseUsingHostName(t *testing.T) {
 		t.Errorf("The connection must have the hostname 192.168.1.1 and not %s", connection.Hostname)
 	}
 }
+
+func TestHOstParseUsingHostNameThatContainsPort(t *testing.T) {
+	hostRaw := `Host testporton
+    HostName 192.168.1.1
+    User johndoe
+    Port 1234`
+
+	i := NewHost("")
+	connection := i.ParseRow(hostRaw)
+
+	if connection.Name != "testporton" {
+		t.Errorf("The connection must have the host set to testporton and not %s", connection.Hostname)
+	}
+}
