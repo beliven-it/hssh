@@ -75,15 +75,23 @@ func (h *host) ParseRow(hostRaw string) Connection {
 			continue
 		}
 
-		if strings.Contains(attribute, "hostname ") {
+		if ok, err := regexp.MatchString(`^hostname `, attribute); err == nil && ok {
 			connection.Hostname = h.getAttributeFromRow("hostname", attribute)
-		} else if strings.Contains(attribute, "user ") {
+		}
+
+		if ok, err := regexp.MatchString(`^user `, attribute); err == nil && ok {
 			connection.User = h.getAttributeFromRow("user", attribute)
-		} else if strings.Contains(attribute, "port ") {
+		}
+
+		if ok, err := regexp.MatchString(`^port `, attribute); err == nil && ok {
 			connection.Port = h.getAttributeFromRow("port", attribute)
-		} else if strings.Contains(attribute, "identityfile ") {
+		}
+
+		if ok, err := regexp.MatchString(`^identityfile `, attribute); err == nil && ok {
 			connection.IdentityFile = h.getAttributeFromRow("identityfile", attribute)
-		} else if strings.Contains(attribute, "host ") {
+		}
+
+		if ok, err := regexp.MatchString(`^host `, attribute); err == nil && ok {
 			connection.Name = h.getAttributeFromRow("host", attribute)
 		}
 	}
