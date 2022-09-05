@@ -75,13 +75,13 @@ func (h *host) ParseRow(hostRaw string) Connection {
 			continue
 		}
 
-		if strings.Contains(attribute, "hostname") {
+		if strings.Contains(attribute, "hostname ") {
 			connection.Hostname = h.getAttributeFromRow("hostname", attribute)
-		} else if strings.Contains(attribute, "user") {
+		} else if strings.Contains(attribute, "user ") {
 			connection.User = h.getAttributeFromRow("user", attribute)
-		} else if strings.Contains(attribute, "port") {
+		} else if strings.Contains(attribute, "port ") {
 			connection.Port = h.getAttributeFromRow("port", attribute)
-		} else if strings.Contains(attribute, "identityfile") {
+		} else if strings.Contains(attribute, "identityfile ") {
 			connection.IdentityFile = h.getAttributeFromRow("identityfile", attribute)
 		} else if strings.Contains(attribute, "host ") {
 			connection.Name = h.getAttributeFromRow("host", attribute)
