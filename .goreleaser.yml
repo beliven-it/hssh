@@ -7,7 +7,7 @@ brews:
   -
     name: hssh
     tap:
-      owner: heply
+      owner: beliven-it
       name: homebrew-tap
     folder: Formula
     caveats: "Run `hssh init` to generate config file inside\n

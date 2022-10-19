@@ -14,7 +14,7 @@ func TestConnectionIsAllowed(t *testing.T) {
 	}
 
 	connection = Connection{
-		Name: "Heply",
+		Name: "Beliven",
 	}
 	isAllowed = connection.IsAllowed()
 	if !isAllowed {

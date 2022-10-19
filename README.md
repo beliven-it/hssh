@@ -2,24 +2,24 @@
 <p align="center"><img src="./assets/hssh.svg" /></p>
 <br>
 <p align="center">
-<img src="https://img.shields.io/github/go-mod/go-version/heply/hssh?color=10bccd&style=for-the-badge" />
-<img src="https://img.shields.io/github/v/release/heply/hssh?color=10bccd&style=for-the-badge" />
-<img src="https://img.shields.io/github/license/heply/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/go-mod/go-version/beliven-it/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/v/release/beliven-it/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/license/beliven-it/hssh?color=10bccd&style=for-the-badge" />
 </p>
 <p align="center">
-<img src="https://img.shields.io/github/issues-pr/heply/hssh?color=10bccd&style=for-the-badge" />
-<img src="https://img.shields.io/github/issues/heply/hssh?color=10bccd&style=for-the-badge" />
-<img src="https://img.shields.io/github/contributors/heply/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/issues-pr/beliven-it/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/issues/beliven-it/hssh?color=10bccd&style=for-the-badge" />
+<img src="https://img.shields.io/github/contributors/beliven-it/hssh?color=10bccd&style=for-the-badge" />
 </p>
 
 A CLI to easily list, search and connect to SSH hosts. Sync down hosts from providers in order to get a centralized hosts configuration.
 
 ## Install
 
-Add Homebrew Heply tap with:
+Add Homebrew Beliven tap with:
 
 ```bash
-  brew tap heply/tap
+  brew tap beliven-it/tap
 ```
 
 Then install `hssh` CLI with:
@@ -48,7 +48,7 @@ Provide at least one connection string to a provider to start using the CLI. You
 
 - **PROVIDER** is the provider name, like **github** or **gitlab**.
 - **ACCESS_TOKEN** is the provider access token. Required only for private projects/repositories.
-- **ENTITY_ID** is the reference to the project/repository where the files are stored. For GitLab is the project ID, you can find it under the project name (eg. `7192789`). For GitHub is the name of the repository (eg. `heply/hssh`).
+- **ENTITY_ID** is the reference to the project/repository where the files are stored. For GitLab is the project ID, you can find it under the project name (eg. `7192789`). For GitHub is the name of the repository (eg. `beliven-it/hssh`).
 - **SUBPATH** is the path to the folder inside the project/repository where config files are saved. This parameter is optional, if you want to store hosts files inside the root of the project/repository, you can delete the `@` and everything after it in the connection string.
 
 ### fzf options
@@ -64,7 +64,7 @@ This is a complete config file example with two providers:
 fzf_options: ""
 providers:
   - "gitlab://my_access_token:/7192789@folder"
-  - "github://my_access_token:/heply/hssh"
+  - "github://my_access_token:/beliven-it/hssh"
 ```
 
 ### Provider project/repository example
@@ -112,7 +112,7 @@ Run `./hssh` inside the folder to test the CLI.
 
 ## Have found a bug?
 
-Please open a new issue [here](https://github.com/heply/hssh/issues).
+Please open a new issue [here](https://github.com/beliven-it/hssh/issues).
 
 ## Mentions
 
