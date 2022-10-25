@@ -7,7 +7,6 @@ type Connection struct {
 	User         string
 	Port         string
 	IdentityFile string
-	isLast       bool
 }
 
 // IsWellConfigured ...
@@ -22,9 +21,5 @@ func (c *Connection) IsWellConfigured() bool {
 
 // IsAllowed ...
 func (c *Connection) IsAllowed() bool {
-	if c.Name == "*" {
-		return false
-	}
-
-	return true
+	return c.Name != "*"
 }

@@ -52,7 +52,10 @@ func serializeConnections(connections *[]models.Connection) string {
 func fzf(context string) string {
 	cmdOptions := viper.GetString("fzf_options")
 	cmdOutput := &bytes.Buffer{}
-	c := exec.Command("bash", "-c", "echo -e '"+context+"' | fzf "+cmdOptions)
+
+	command := fmt.Sprintf("echo -e '%s' | fzf %s", context, cmdOptions)
+
+	c := exec.Command("bash", "-c", command)
 	c.Stdout = cmdOutput
 	c.Stderr = os.Stderr
 	c.Stdin = os.Stdin
@@ -62,7 +65,7 @@ func fzf(context string) string {
 		os.Exit(1)
 	}
 
-	return string(cmdOutput.Bytes())
+	return cmdOutput.String()
 }
 
 func ssh(connectionName string) {
@@ -78,10 +81,11 @@ func ssh(connectionName string) {
 }
 
 func searchConnectionByPattern(pattern string, connections *[]models.Connection) models.Connection {
-	clearRgx := regexp.MustCompile("(\\n|\\r)")
+	clearRgx := regexp.MustCompile(`(\n|\r)`)
 	takeNameRgx := regexp.MustCompile(" ->.*")
 	pattern = clearRgx.ReplaceAllString(pattern, "")
 	pattern = takeNameRgx.ReplaceAllString(pattern, "")
+
 	for _, connection := range *connections {
 		if connection.Name == pattern {
 			return connection
