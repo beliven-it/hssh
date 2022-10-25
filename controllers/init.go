@@ -7,7 +7,6 @@ import (
 	"hssh/messages"
 	"hssh/templates"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -25,7 +24,7 @@ func upsertConfigSSH() error {
 
 	defer file.Close()
 
-	oldContent, err := ioutil.ReadFile(config.SSHConfigFilePath)
+	oldContent, err := os.ReadFile(config.SSHConfigFilePath)
 	oldContentToString := string(oldContent)
 
 	delimiterStart := "# HSSH start managed"
