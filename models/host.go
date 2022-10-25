@@ -1,7 +1,6 @@
 package models
 
 import (
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -12,13 +11,12 @@ type host struct {
 	path        string
 	content     string
 	connections []Connection
-	channel     chan Connection
 }
 
 // IHost ...
 type IHost interface {
 	ReadFile()
-	ParseRow(string) Connection
+	ParseRow(string) []Connection
 	Parse() []Connection
 	GetPath() string
 	GetContent() string
@@ -29,7 +27,7 @@ type IHost interface {
 }
 
 func (h *host) ReadFile() {
-	contentBytes, err := ioutil.ReadFile(h.path)
+	contentBytes, err := os.ReadFile(h.path)
 	if err != nil {
 		return
 	}
@@ -40,7 +38,7 @@ func (h *host) ReadFile() {
 func (h *host) Create(content []byte) error {
 	filePathSplitted := strings.Split(h.path, "/")
 	folderPath := filePathSplitted[0 : len(filePathSplitted)-1]
-	err := os.MkdirAll(strings.Join(folderPath, "/"), os.ModePerm)
+	os.MkdirAll(strings.Join(folderPath, "/"), os.ModePerm)
 
 	file, err := os.Create(h.path)
 	if err != nil {
@@ -65,8 +63,43 @@ func (h *host) getAttributeFromRow(attribute string, row string) string {
 	return strings.Trim(rgx.ReplaceAllString(row, ""), " ")
 }
 
-func (h *host) ParseRow(hostRaw string) Connection {
+func (h *host) getAliases(host string) []string {
+	var aliases = []string{}
+	rgxDoubleQuotes := regexp.MustCompile(`(".*?")`)
+
+	matches := rgxDoubleQuotes.FindAllStringSubmatch(host, -1)
+	if len(matches) == 0 {
+		aliases = append(aliases, host)
+		return aliases
+	}
+
+	host = rgxDoubleQuotes.ReplaceAllString(host, "")
+	aliases = append(aliases, strings.Split(host, " ")...)
+
+	for _, group := range matches {
+		aliases = append(aliases, group[1:]...)
+	}
+
+	filteredAliases := []string{}
+	for _, alias := range aliases {
+		alias = strings.Trim(alias, " ")
+		if alias == "" {
+			continue
+		}
+
+		if alias == "*" {
+			continue
+		}
+
+		filteredAliases = append(filteredAliases, alias)
+	}
+
+	return filteredAliases
+}
+
+func (h *host) ParseRow(hostRaw string) []Connection {
 	connection := Connection{}
+
 	for _, attribute := range strings.Split(hostRaw, "\n") {
 		attribute = strings.Trim(attribute, " ")
 		attribute = strings.ToLower(attribute)
@@ -75,28 +108,44 @@ func (h *host) ParseRow(hostRaw string) Connection {
 			continue
 		}
 
-		if ok, err := regexp.MatchString(`^hostname `, attribute); err == nil && ok {
+		if strings.HasPrefix(attribute, "hostname ") {
 			connection.Hostname = h.getAttributeFromRow("hostname", attribute)
 		}
 
-		if ok, err := regexp.MatchString(`^user `, attribute); err == nil && ok {
+		if strings.HasPrefix(attribute, "user ") {
 			connection.User = h.getAttributeFromRow("user", attribute)
 		}
 
-		if ok, err := regexp.MatchString(`^port `, attribute); err == nil && ok {
+		if strings.HasPrefix(attribute, "port ") {
 			connection.Port = h.getAttributeFromRow("port", attribute)
 		}
 
-		if ok, err := regexp.MatchString(`^identityfile `, attribute); err == nil && ok {
+		if strings.HasPrefix(attribute, "identityfile ") {
 			connection.IdentityFile = h.getAttributeFromRow("identityfile", attribute)
 		}
 
-		if ok, err := regexp.MatchString(`^host `, attribute); err == nil && ok {
+		if strings.HasPrefix(attribute, "host ") {
 			connection.Name = h.getAttributeFromRow("host", attribute)
 		}
 	}
 
-	return connection
+	aliases := h.getAliases(connection.Name)
+
+	var connections = []Connection{}
+
+	if !connection.IsWellConfigured() {
+		return h.connections
+	}
+
+	for _, alias := range aliases {
+		connection.Name = alias
+
+		if connection.IsAllowed() {
+			connections = append(connections, connection)
+		}
+	}
+
+	return connections
 }
 
 func (h *host) ProvideViaChannel(channel *chan Connection) {
@@ -115,7 +164,7 @@ func (h *host) Parse() []Connection {
 	content := strings.TrimSpace(h.content)
 
 	// Remove comments
-	content = regexp.MustCompile("(?m)^(|\\s+)#.*").ReplaceAllString(content, "")
+	content = regexp.MustCompile(`(?m)^(|\s+)#.*`).ReplaceAllString(content, "")
 
 	// Remove empty lines
 	content = regexp.MustCompile("[\t\r\n]+").ReplaceAllString(content, "\n")
@@ -131,16 +180,7 @@ func (h *host) Parse() []Connection {
 			continue
 		}
 
-		connection := h.ParseRow(host)
-		if !connection.IsAllowed() {
-			continue
-		}
-
-		if !connection.IsWellConfigured() {
-			continue
-		}
-
-		h.connections = append(h.connections, connection)
+		h.connections = append(h.connections, h.ParseRow(host)...)
 	}
 
 	return h.connections
