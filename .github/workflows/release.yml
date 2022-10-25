@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [created, updated]
+    types: [created, edited]
 
 jobs:
   goreleaser:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.19
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
