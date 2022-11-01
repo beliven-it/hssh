@@ -5,7 +5,7 @@ builds:
 
 brews:
   -
-    name: "hssh@{{ .Env.APP_RELEASE }}"
+    name: hssh@{{.Version}}
     tap:
       owner: beliven-it
       name: homebrew-tap
