@@ -19,3 +19,18 @@ brews:
     license: "MIT"
     dependencies:
       - name: fzf
+  -
+    name: hssh
+    tap:
+      owner: beliven-it
+      name: homebrew-tap
+    folder: Formula
+    caveats: "Run `hssh init` to generate config file inside\n
+      `~/.config/hssh/config.yml` (works only if not exists yet)\n
+      or let the CLI creating it automatically on first run (every command).\n
+      \n
+      Type `hssh help` for further information."
+    description: "A CLI to easily sync, list, search and connect to SSH hosts"
+    license: "MIT"
+    dependencies:
+      - name: fzf
