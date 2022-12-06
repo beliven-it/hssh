@@ -102,11 +102,13 @@ func (h *host) ParseRow(hostRaw string) []Connection {
 
 	for _, attribute := range strings.Split(hostRaw, "\n") {
 		attribute = strings.Trim(attribute, " ")
-		attribute = strings.ToLower(attribute)
+		partials := strings.Split(attribute, " ")
 
-		if attribute == "" {
+		if partials[0] == "" {
 			continue
 		}
+
+		attribute = strings.ToLower(partials[0]) + " " + partials[1]
 
 		if strings.HasPrefix(attribute, "hostname ") {
 			connection.Hostname = h.getAttributeFromRow("hostname", attribute)

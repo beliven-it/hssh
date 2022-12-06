@@ -61,7 +61,7 @@ This is a complete config file example with two providers:
 
 ```yaml
 # HSSH configuration file
-fzf_options: ""
+fzf_options: "-i"
 providers:
   - "gitlab://my_access_token:/7192789@folder"
   - "github://my_access_token:/beliven-it/hssh"
