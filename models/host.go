@@ -104,7 +104,7 @@ func (h *host) ParseRow(hostRaw string) []Connection {
 		attribute = strings.Trim(attribute, " ")
 		partials := strings.SplitN(attribute, " ", 2)
 
-		if partials[0] == "" {
+		if len(partials) != 2 || partials[0] == "" || partials[1] == "" {
 			continue
 		}
 
