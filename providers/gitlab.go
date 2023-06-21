@@ -20,8 +20,8 @@ func (g *gitlab) get(endpoint string, queryParams []queryParam) ([]byte, error) 
 		return nil, err
 	}
 
-	if g.privateToken != "" {
-		request.Header.Set("PRIVATE-TOKEN", g.privateToken)
+	if g.connection.Token != "" {
+		request.Header.Set("PRIVATE-TOKEN", g.connection.Token)
 	}
 
 	query := request.URL.Query()
@@ -105,24 +105,19 @@ func (g *gitlab) GetFile(projectID string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *gitlab) Start() (*gitlab, error) {
-	_, err := g.provider.ParseConnection("gitlab")
-	if err != nil {
-		return nil, err
-	}
-
-	return g, nil
-}
-
 // NewGitlab ...
 /*............................................................................*/
-func NewGitlab(connectionString string) (IProvider, error) {
+func NewGitlab(connection ProviderConnection) (IProvider, error) {
+	if connection.URL == "" {
+		connection.URL = "https://gitlab.com/api/v4"
+	}
+
 	g := gitlab{
 		provider: provider{
-			driver:           "gitlab",
-			connectionString: connectionString,
-			url:              "https://gitlab.com/api/v4",
+			driver:     "gitlab",
+			connection: connection,
+			url:        connection.URL,
 		},
 	}
-	return g.Start()
+	return &g, nil
 }
