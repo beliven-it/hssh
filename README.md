@@ -14,6 +14,8 @@
 
 A CLI to easily list, search and connect to SSH hosts. Sync down hosts from providers in order to get a centralized hosts configuration.
 
+<br><br><br><br>
+
 ## Install
 
 Add Homebrew Beliven tap with:
@@ -28,6 +30,8 @@ Then install `hssh` CLI with:
   brew install hssh
 ```
 
+<br><br><br><br>
+
 ## Configuration
 
 Run `hssh init` to generate config file inside `~/.config/hssh/config.yml` (works only if not exists yet) or let the CLI creating it automatically on first run (every command).
@@ -36,6 +40,8 @@ Right now the CLI supports the following providers:
 
 - GitLab
 - GitHub
+
+<br><br>
 
 ### Providers
 
@@ -51,9 +57,34 @@ Provide at least one connection string to a provider to start using the CLI. You
 - **ENTITY_ID** is the reference to the project/repository where the files are stored. For GitLab is the project ID, you can find it under the project name (eg. `7192789`). For GitHub is the name of the repository (eg. `beliven-it/hssh`).
 - **SUBPATH** is the path to the folder inside the project/repository where config files are saved. This parameter is optional, if you want to store hosts files inside the root of the project/repository, you can delete the `@` and everything after it in the connection string.
 
+You can also provide a structured version of the provider configuration in the following format:
+
+```yml
+providers:
+  - type: gitlab
+    url: "https://gitlab.com/api/v4"
+    access_token: gpat-123456789
+    entity_id: 9999
+    subpath: "path/to/folder"
+  - type: gitlab
+    url: "https://git.my-domain.com/api/v4"
+    access_token: mydingpat-123444444
+    entity_id: 11
+    subpath: "path"
+
+```
+
+> **NOTE**
+>
+> You cannot have the two providers configuration in different format. Make sure to use or the structured version, or the string version.
+
+<br><br>
+
 ### fzf options
 
 See the man page (`man fzf`) for the full list of available options and add the desired ones to the `fzf_options` string inside `~/.config/hssh/config.yml`. See more about the fzf options in the [official repository](https://github.com/junegunn/fzf#options).
+
+<br><br>
 
 ### Config file example
 
@@ -96,9 +127,13 @@ SSH host example to put inside hosts files:
     IdentityFile ~/ssh/id_rsa
 ```
 
+<br><br><br><br>
+
 ## Usage
 
 To see available commands and options, run: `hssh`, `hssh help`, `hssh --help` or `hssh -h`.
+
+<br><br><br><br>
 
 ## Development
 
@@ -110,13 +145,18 @@ Clone the repository and run inside the folder:
 
 Run `./hssh` inside the folder to test the CLI.
 
+<br><br><br><br>
+
 ## Have found a bug?
 
 Please open a new issue [here](https://github.com/beliven-it/hssh/issues).
 
+<br><br><br><br>
 ## Mentions
 
 - [dmitri13](https://www.flaticon.com/authors/dmitri13) for the icon of the terminal used in the banner image
+
+<br><br><br><br>
 
 ## License
 

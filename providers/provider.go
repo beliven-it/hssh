@@ -23,7 +23,7 @@ type IProvider interface {
 type ProviderConnection struct {
 	Type     string `mapstructure:"type"`
 	URL      string `mapstructure:"url"`
-	Token    string `mapstructure:"token"`
+	Token    string `mapstructure:"access_token"`
 	EntityID string `mapstructure:"entity_id"`
 	Subpath  string `mapstructure:"subpath"`
 }
