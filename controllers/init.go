@@ -24,7 +24,7 @@ func upsertConfigSSH() error {
 
 	defer file.Close()
 
-	oldContent, err := os.ReadFile(config.SSHConfigFilePath)
+	oldContent, _ := os.ReadFile(config.SSHConfigFilePath)
 	oldContentToString := string(oldContent)
 
 	delimiterStart := "# HSSH start managed"
@@ -32,7 +32,7 @@ func upsertConfigSSH() error {
 	includeString := "Include " + config.HSSHHostFolderName + "/*"
 
 	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
-	if isFilePathInConfigSSH(oldContentToString, row) == true {
+	if isFilePathInConfigSSH(oldContentToString, row) {
 		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n\n")
 		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
 	}
@@ -124,12 +124,12 @@ func isHSSHInitialized() bool {
 func Init(force bool) {
 
 	isInit := isHSSHInitialized()
-	if force == false && isInit == false {
+	if !force && !isInit {
 		messages.ConfigNotEditedYet()
 		os.Exit(0)
 	}
 
-	if force == false && isInit == true {
+	if !force && isInit {
 		viper.SetConfigFile(config.HSSHConfigFilePath)
 		viper.AutomaticEnv()
 		if err := viper.ReadInConfig(); err != nil {
@@ -142,7 +142,7 @@ func Init(force bool) {
 		func() {
 			CreateHSSHConfig(func(err error, isNotConfigured bool) {
 				messages.PrintStep(fmt.Sprintf("File %s", config.HSSHConfigFilePath), err)
-				if isNotConfigured == true {
+				if isNotConfigured {
 					messages.MustBeConfigured()
 				}
 			})
@@ -156,9 +156,9 @@ func Init(force bool) {
 			CreateHSSHHostFolder(func(err error) {
 				messages.PrintStep(fmt.Sprintf("Folder %s", config.HSSHHostFolderPath), err)
 				isEmpty, err := isFolderEmpty(config.HSSHHostFolderPath)
-				if err != nil || isEmpty == true {
+				if err != nil || isEmpty {
 					Sync()
-					messages.PrintStep(fmt.Sprintf("Automatic Sync"), err)
+					messages.PrintStep("Automatic Sync", err)
 				} else {
 					messages.Print("Folder is not empty. The automatic sync will be ignored\n")
 				}
