@@ -38,7 +38,7 @@ func craftPath(filePath string) string {
 func getObsoleteFiles(whitelist []string) []string {
 	files := []string{}
 	filepath.Walk(config.HSSHHostFolderPath, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() == true {
+		if info.IsDir() {
 			return nil
 		}
 
@@ -49,7 +49,7 @@ func getObsoleteFiles(whitelist []string) []string {
 			}
 		}
 
-		if match == true {
+		if match {
 			return nil
 		}
 
@@ -101,7 +101,6 @@ func syncWithProvider(providerConnection providers.ProviderConnection) []string 
 			}
 
 			hostPath = host.GetPath()
-			return
 		}(file.Path, file.ID)
 	}
 
@@ -121,6 +120,9 @@ func syncWithProvider(providerConnection providers.ProviderConnection) []string 
 }
 
 func readProviderConnections() []providers.ProviderConnection {
+	var providersConfig Config
+	list := []providers.ProviderConnection{}
+
 	// Single provider of the first version
 	singleProvider := viper.GetString("provider")
 
@@ -128,16 +130,13 @@ func readProviderConnections() []providers.ProviderConnection {
 	// if the user select the new version of multi structured providers
 	// the result is empty slice
 	multiProvider := viper.GetStringSlice("providers")
-
-	// Structured multi provider for the new version
-	var providersConfig Config
-	viper.Unmarshal(&providersConfig)
-
 	multiProvider = append(multiProvider, singleProvider)
 	multiProvider = unique(multiProvider)
 
-	list := []providers.ProviderConnection{}
+	// Structured multi provider for the new version
+	viper.Unmarshal(&providersConfig)
 
+	// Convert string connections into structured version
 	for _, p := range multiProvider {
 		pconn := providers.ProviderConnection{}
 		pconn.FromString(p)
@@ -145,9 +144,7 @@ func readProviderConnections() []providers.ProviderConnection {
 		list = append(list, pconn)
 	}
 
-	list = append(list, providersConfig.Providers...)
-
-	return list
+	return append(list, providersConfig.Providers...)
 }
 
 // Sync ...
@@ -168,7 +165,6 @@ func Sync() {
 			} else {
 				channel <- syncWithProvider(p)
 			}
-			return
 		}(provider)
 	}
 
