@@ -10,12 +10,12 @@ fzf_options: "-i"
 providers:
   - type: gitlab
     url: "https://gitlab.com/api/v4"
-    token: "<MY-TOKEN>"
+    access_token: "<MY-TOKEN>"
     entity_id: "<ENTITY_ID>"
     subpath: "<SUBPATH>"
   - type: github
     url: "https://api.github.com"
-    token: "<MY-TOKEN>"
+    access_token: "<MY-TOKEN>"
     entity_id: "<ENTITY_ID>"
     subpath: "<SUBPATH>"
 `
