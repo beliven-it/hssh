@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -28,8 +27,8 @@ func (g *github) get(endpoint string, queryParams []queryParam) ([]byte, error) 
 		return nil, err
 	}
 
-	if g.privateToken != "" {
-		request.Header.Set("Authorization", "token "+g.privateToken)
+	if g.connection.Token != "" {
+		request.Header.Set("Authorization", "token "+g.connection.Token)
 	}
 
 	query := request.URL.Query()
@@ -81,7 +80,6 @@ func (g *github) GetFiles(repo string, filePath string) ([]file, error) {
 
 	err = json.Unmarshal(bodyInBytes, &gitFiles)
 	if err != nil {
-		fmt.Println("A", string(bodyInBytes))
 		return nil, err
 	}
 
@@ -126,23 +124,19 @@ func (g *github) GetFile(repo string, fileID string) ([]byte, error) {
 	return content, nil
 }
 
-func (g *github) Start() (*github, error) {
-	_, err := g.provider.ParseConnection("github")
-	if err != nil {
-		return nil, err
-	}
-	return g, nil
-}
-
 // NewGithub ...
 /*............................................................................*/
-func NewGithub(connectionString string) (IProvider, error) {
+func NewGithub(connection ProviderConnection) (IProvider, error) {
+	if connection.URL == "" {
+		connection.URL = "https://api.github.com"
+	}
+
 	g := github{
 		provider: provider{
-			driver:           "github",
-			connectionString: connectionString,
-			url:              "https://api.github.com",
+			driver:     "github",
+			connection: connection,
+			url:        connection.URL,
 		},
 	}
-	return g.Start()
+	return &g, nil
 }

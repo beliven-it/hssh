@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"hssh/config"
 	"hssh/messages"
@@ -16,15 +15,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-func getProjectIDAndPath(providerConnectionString string) (string, string, error) {
-	rgx := regexp.MustCompile("^.*:/(.*)@(.*)$")
-	matches := rgx.FindAllStringSubmatch(providerConnectionString, 1)
-
-	if len(matches) == 0 || len(matches[0]) < 2 {
-		return "", "", errors.New("Cannot find project ID or Path in the provided string")
-	}
-
-	return matches[0][1], matches[0][2], nil
+type Config struct {
+	Providers []providers.ProviderConnection `mapstructure:"providers"`
 }
 
 func isFilePathInConfigSSH(content string, filePath string) bool {
@@ -46,7 +38,7 @@ func craftPath(filePath string) string {
 func getObsoleteFiles(whitelist []string) []string {
 	files := []string{}
 	filepath.Walk(config.HSSHHostFolderPath, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() == true {
+		if info.IsDir() {
 			return nil
 		}
 
@@ -57,7 +49,7 @@ func getObsoleteFiles(whitelist []string) []string {
 			}
 		}
 
-		if match == true {
+		if match {
 			return nil
 		}
 
@@ -69,18 +61,15 @@ func getObsoleteFiles(whitelist []string) []string {
 	return files
 }
 
-func syncWithProvider(providerConnection string) []string {
-	projectID, remotePath, err := getProjectIDAndPath(providerConnection)
-
+func syncWithProvider(providerConnection providers.ProviderConnection) []string {
 	provider, err := providers.New(providerConnection)
 	if err != nil {
-		messages.ProviderError(providerConnection, err)
 		os.Exit(1)
 	}
 
-	files, err := provider.GetFiles(projectID, remotePath)
+	files, err := provider.GetFiles(providerConnection.EntityID, providerConnection.Subpath)
 	if err != nil {
-		messages.ProviderFetchError(providerConnection, err)
+		messages.ProviderFetchError(err)
 		os.Exit(1)
 	}
 
@@ -92,7 +81,7 @@ func syncWithProvider(providerConnection string) []string {
 
 	for _, file := range files {
 		go func(path string, id string) {
-			fileContent, err := provider.GetFile(projectID, id)
+			fileContent, err := provider.GetFile(providerConnection.EntityID, id)
 			var hostPath string
 			defer func(hp string) {
 				channel <- hostPath
@@ -112,7 +101,6 @@ func syncWithProvider(providerConnection string) []string {
 			}
 
 			hostPath = host.GetPath()
-			return
 		}(file.Path, file.ID)
 	}
 
@@ -131,13 +119,37 @@ func syncWithProvider(providerConnection string) []string {
 	return filesCreated
 }
 
-// Sync ...
-func Sync() {
-	singleProvider := viper.GetString("provider")
-	multiProvider := viper.GetStringSlice("providers")
+func readProviderConnections() []providers.ProviderConnection {
+	var providersConfig Config
+	list := []providers.ProviderConnection{}
 
+	// Single provider of the first version
+	singleProvider := viper.GetString("provider")
+
+	// Multiple provider of the early version
+	// if the user select the new version of multi structured providers
+	// the result is empty slice
+	multiProvider := viper.GetStringSlice("providers")
 	multiProvider = append(multiProvider, singleProvider)
 	multiProvider = unique(multiProvider)
+
+	// Structured multi provider for the new version
+	viper.Unmarshal(&providersConfig)
+
+	// Convert string connections into structured version
+	for _, p := range multiProvider {
+		pconn := providers.ProviderConnection{}
+		pconn.FromString(p)
+
+		list = append(list, pconn)
+	}
+
+	return append(list, providersConfig.Providers...)
+}
+
+// Sync ...
+func Sync() {
+	multiProvider := readProviderConnections()
 
 	wg := new(sync.WaitGroup)
 
@@ -147,13 +159,12 @@ func Sync() {
 	wg.Add(len(multiProvider))
 
 	for _, provider := range multiProvider {
-		go func(p string) {
-			if p == "" {
+		go func(p providers.ProviderConnection) {
+			if p.Type == "" {
 				channel <- []string{}
 			} else {
 				channel <- syncWithProvider(p)
 			}
-			return
 		}(provider)
 	}
 
