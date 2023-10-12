@@ -38,7 +38,7 @@ func (h *host) ReadFile() {
 func (h *host) Create(content []byte) error {
 	filePathSplitted := strings.Split(h.path, "/")
 	folderPath := filePathSplitted[0 : len(filePathSplitted)-1]
-	os.MkdirAll(strings.Join(folderPath, "/"), os.ModePerm)
+	os.MkdirAll(strings.Join(folderPath, "/"), 0644)
 
 	file, err := os.Create(h.path)
 	if err != nil {

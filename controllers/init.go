@@ -49,7 +49,7 @@ func upsertConfigSSH() error {
 // exist and create it if not
 func initRequiredHomeSpaceFile(configPath string, template string) (int, error) {
 	// Create needed folders if not exist
-	err := os.MkdirAll(path.Dir(configPath), os.ModePerm)
+	err := os.MkdirAll(path.Dir(configPath), 0644)
 	if err != nil {
 		return 1, err
 	}
