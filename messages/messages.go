@@ -74,17 +74,15 @@ func ViperLoadError(err error) {
 }
 
 // ProviderError ...
-func ProviderError(connectionString string, err error) {
+func ProviderError(err error) {
 	fmt.Println(Color("red", err.Error()))
 	fmt.Println(Color("black", "Checkout the config file for errors."))
 	fmt.Println(Color("black", "Probabily the connection string is malformed"))
-	fmt.Println(Color("blue", "\n"+connectionString+"\n"))
 }
 
-//ProviderFetchError ...
-func ProviderFetchError(connectionString string, err error) {
+// ProviderFetchError ...
+func ProviderFetchError(err error) {
 	fmt.Println(Color("black", "An error occured during files fetch"))
-	ProviderError(connectionString, err)
 }
 
 // SyncFileCreation ...

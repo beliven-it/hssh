@@ -20,6 +20,27 @@ type IProvider interface {
 	iGetDriver
 }
 
+type ProviderConnection struct {
+	Type     string `mapstructure:"type"`
+	URL      string `mapstructure:"url"`
+	Token    string `mapstructure:"access_token"`
+	EntityID string `mapstructure:"entity_id"`
+	Subpath  string `mapstructure:"subpath"`
+}
+
+func (p *ProviderConnection) FromString(connectionString string) {
+	rgx := regexp.MustCompile(`^(.*?)://(.*?):/(.*?)\@(.*)`)
+	result := rgx.FindAllStringSubmatch(connectionString, 1)
+
+	if len(result) >= 1 {
+		p.Type = result[0][1]
+		p.URL = ""
+		p.Token = result[0][2]
+		p.EntityID = result[0][3]
+		p.Subpath = result[0][4]
+	}
+}
+
 type iGet interface {
 	get(string, []queryParam) ([]byte, error)
 }
@@ -50,10 +71,10 @@ privateToken instead permit to
 authenticate to the service
 */
 type provider struct {
-	url              string
-	privateToken     string
-	connectionString string
-	driver           string
+	url          string
+	privateToken string
+	connection   ProviderConnection
+	driver       string
 }
 
 type file struct {
@@ -72,10 +93,6 @@ func (p *provider) GetDriver() string {
 	return p.driver
 }
 
-func (p *provider) GetConnectionString() string {
-	return p.connectionString
-}
-
 func (p *provider) GetPrivateToken() string {
 	return p.privateToken
 }
@@ -84,45 +101,15 @@ func (p *provider) GetURL() string {
 	return p.url
 }
 
-func (p *provider) ParseConnection(driver string) (*provider, error) {
-
-	rgx := regexp.MustCompile("^" + driver + "://(.*?)(:/|$)")
-	result := rgx.FindAllStringSubmatch(p.connectionString, 1)
-
-	if len(result) == 0 || len(result[0]) < 2 {
-		return p, errors.New("Cannot extract token from connection string.\nThe connection string must follow the format:\n<driver>://<token>")
-	}
-
-	p.privateToken = result[0][1]
-
-	return p, nil
-}
-
-func getDriverFromConnectionString(connectionString string) (string, error) {
-	rgx := regexp.MustCompile("^(.*?)://")
-	driver := rgx.FindAllStringSubmatch(connectionString, 1)
-
-	if len(driver) == 0 {
-		return "", errors.New("Invalid connection string")
-	}
-
-	return driver[0][1], nil
-}
-
 // New ...
 /*............................................................................*/
-func New(connectionString string) (IProvider, error) {
-	driver, err := getDriverFromConnectionString(connectionString)
-	if err != nil {
-		return nil, err
-	}
-
-	switch driver {
+func New(connection ProviderConnection) (IProvider, error) {
+	switch connection.Type {
 	case "gitlab":
-		return NewGitlab(connectionString)
+		return NewGitlab(connection)
 	case "github":
-		return NewGithub(connectionString)
+		return NewGithub(connection)
 	default:
-		return nil, errors.New("Invalid driver provider " + driver)
+		return nil, errors.New("Invalid driver provider " + connection.Type)
 	}
 }
