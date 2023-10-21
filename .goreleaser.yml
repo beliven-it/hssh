@@ -6,7 +6,7 @@ builds:
 brews:
   -
     name: hssh@{{.Version}}
-    tap:
+    repository:
       owner: beliven-it
       name: homebrew-tap
     folder: Formula
@@ -21,7 +21,7 @@ brews:
       - name: fzf
   -
     name: hssh
-    tap:
+    repository:
       owner: beliven-it
       name: homebrew-tap
     folder: Formula
