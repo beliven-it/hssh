@@ -8,7 +8,7 @@ updates:
     time: '00:00'
   open-pull-requests-limit: 10
   reviewers:
-    - beliven-valentino-cossar
+    - valentinocossar
   assignees:
     - casvaldot
   commit-message:
