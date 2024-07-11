@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"hssh/controllers"
+	"hssh/services"
 
 	"github.com/spf13/cobra"
 )
@@ -11,7 +11,7 @@ var initCmd = &cobra.Command{
 	Aliases: []string{"i"},
 	Short:   "Init HSSH",
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.Init(true)
+		services.Init(true)
 	},
 }
 

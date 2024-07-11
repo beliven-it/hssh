@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"hssh/controllers"
+	"hssh/services"
 
 	"github.com/spf13/cobra"
 )
@@ -11,7 +11,7 @@ var connectCmd = &cobra.Command{
 	Aliases: []string{"c"},
 	Short:   "Search and connect to host using fzf",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(false)
+		services.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var host string
@@ -19,7 +19,7 @@ var connectCmd = &cobra.Command{
 			host = args[0]
 		}
 
-		controllers.Connect(host)
+		services.Connect(host)
 	},
 }
 

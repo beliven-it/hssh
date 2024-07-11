@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"hssh/controllers"
+	"hssh/services"
 
 	"github.com/spf13/cobra"
 )
@@ -11,16 +11,15 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"l"},
 	Short:   "List all available hosts",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(false)
+		services.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		colors, _ := cmd.Flags().GetBool("colors")
-		connections := controllers.List()
+		connections := services.List()
 
 		for _, connection := range connections {
-			controllers.PrintConnection(&connection, colors)
+			services.PrintConnection(&connection, colors)
 		}
-
 	},
 }
 
