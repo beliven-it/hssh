@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"hssh/controllers"
 	"hssh/messages"
+	"hssh/services"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,7 +13,7 @@ var findCmd = &cobra.Command{
 	Aliases: []string{"f"},
 	Short:   "Find host details using fzf",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		controllers.Init(false)
+		services.Init(false)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var host string
@@ -21,13 +21,13 @@ var findCmd = &cobra.Command{
 			host = args[0]
 		}
 
-		connection := controllers.Find(host)
+		connection := services.Find(host)
 		if connection.Name == "" {
 			messages.NoConnection()
 			os.Exit(0)
 		}
 
-		controllers.PrintConnectionDetails(&connection)
+		services.PrintConnectionDetails(&connection)
 	},
 }
 

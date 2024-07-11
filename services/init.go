@@ -1,4 +1,4 @@
-package controllers
+package services
 
 import (
 	"crypto/md5"
@@ -31,7 +31,7 @@ func upsertConfigSSH() error {
 	delimiterEnd := "# HSSH end managed"
 	includeString := "Include " + config.HSSHHostFolderName + "/*"
 
-	var row = delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
+	row := delimiterStart + "\n" + includeString + "\n" + delimiterEnd + "\n\n"
 	if isFilePathInConfigSSH(oldContentToString, row) {
 		deleteRegex := regexp.MustCompile("(?ms)" + delimiterStart + ".*" + delimiterEnd + "\n\n")
 		oldContentToString = deleteRegex.ReplaceAllString(oldContentToString, "")
@@ -122,7 +122,6 @@ func isHSSHInitialized() bool {
 
 // Init ...
 func Init(force bool) {
-
 	isInit := isHSSHInitialized()
 	if !force && !isInit {
 		messages.ConfigNotEditedYet()
@@ -162,7 +161,6 @@ func Init(force bool) {
 				} else {
 					messages.Print("Folder is not empty. The automatic sync will be ignored\n")
 				}
-
 			})
 		},
 	}
@@ -170,5 +168,4 @@ func Init(force bool) {
 	for _, action := range actions {
 		action()
 	}
-
 }

@@ -1,4 +1,4 @@
-package controllers
+package services
 
 import (
 	"hssh/config"
@@ -27,12 +27,12 @@ func unique(arr []string) []string {
 // List the connections available
 func List() []models.Connection {
 	var connections []models.Connection
-	var filesToRead = []string{config.SSHConfigFilePath}
+	filesToRead := []string{config.SSHConfigFilePath}
 
 	sshConfigInstance := models.NewSSHConfig(config.SSHConfigFilePath)
 	filesToInclude := sshConfigInstance.GetIncludes()
 
-	var folders = []string{
+	folders := []string{
 		config.HSSHHostFolderPath,
 	}
 	folders = unique(append(folders, filesToInclude...))
